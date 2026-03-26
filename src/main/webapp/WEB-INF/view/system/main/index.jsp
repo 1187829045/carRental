@@ -57,9 +57,10 @@
 <%--                    <a href="javascript:;"><i class="seraph icon-lock"></i><cite>锁屏</cite></a>--%>
 <%--                </li>--%>
                 <li class="layui-nav-item" id="userInfo">
-<%--                    <a href="javascript:;"><img src="${yeqifu}/static/images/userface2.jpg" class="layui-nav-img userAvatar"--%>
-<%--                                                width="35" height="35">--%>
-                        <cite class="adminName" style="margin-right: 30px">${user.realname}</cite></a>
+                    <a href="javascript:;">
+                        <cite class="adminName">${user.realname}</cite>
+                        <img src="${yeqifu}/static/images/face.jpg" class="layui-nav-img userAvatar" width="35" height="35" style="margin-left: 10px;">
+                    </a>
                     <dl class="layui-nav-child">
 <%--                        <dd><a href="javascript:;" data-url="${yeqifu}/static/page/user/userInfo.html"><i--%>
 <%--                                class="seraph icon-ziliao" data-icon="icon-ziliao"></i><cite>个人资料</cite></a></dd>--%>

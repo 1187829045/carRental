@@ -203,6 +203,7 @@ iframe {
 /*顶部*/
 .header {
     z-index: 2000;
+    background-color: #393D49 !important;
 }
 
 .logo {
@@ -213,6 +214,7 @@ iframe {
     padding: 0 25px;
     text-align: center;
     width: 135px;
+    background-color: #393D49 !important;
 }
 
 .hideMenu {
@@ -225,7 +227,7 @@ iframe {
     text-align: center;
     padding: 5px 5px;
     color: #fff;
-    background-color: #1AA094;
+    background-color: #393D49;
 }
 
 .hideMenu:hover {
@@ -289,6 +291,7 @@ iframe {
 .layui-layout-admin .layui-side {
     left: 0;
     overflow: hidden;
+    background-color: #393D49 !important;
 }
 
 .user-photo {
@@ -330,7 +333,7 @@ iframe {
 
 /*左侧导航重定义*/
 .layui-nav-item.layui-nav-itemed {
-    background-color: #2B2E37 !important;
+    background-color: #23262E !important;
 }
 
 .layui-nav-itemed:before {
@@ -345,6 +348,7 @@ iframe {
 
 .layui-nav-itemed .layui-nav-child a {
     padding-left: 40px;
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 /*左侧搜索框*/
@@ -396,8 +400,8 @@ iframe {
 /*layui-body*/
 .layui-body {
     overflow: hidden;
-    border-top: 5px solid #1AA094;
-    border-left: 2px solid #1AA094;
+    border-top: 5px solid #393D49;
+    border-left: 2px solid #393D49;
     background: #fff;
 }
 
@@ -413,7 +417,7 @@ iframe {
 }
 
 .layui-tab-title .layui-this {
-    background-color: #1AA094;
+    background-color: #393D49;
     color: #fff;
 }
 
@@ -649,10 +653,8 @@ iframe {
 
 .header .layui-nav .layui-nav-item, .header .layui-nav .layui-nav-item > a, .header, .logo {
     line-height: 50px !important;
-    max-height: 50px;
-!important;
+    max-height: 50px !important;
 }
-
 .mobileTopLevelMenus {
     float: left;
 }
