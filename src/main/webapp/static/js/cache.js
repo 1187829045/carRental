@@ -172,6 +172,11 @@ layui.use(['form','jquery',"layer"],function() {
 
     //更换皮肤
     function skins(){
+        if($("body").hasClass("blue")){
+            window.sessionStorage.setItem("skin","blue");
+            window.sessionStorage.setItem("skinValue","蓝色");
+            $(".layui-bg-black,.hideMenu,.layui-layout-admin .layui-header").removeAttr("style");
+        }
         var skin = window.sessionStorage.getItem("skin");
         if(!skin){
             window.sessionStorage.setItem("skin","blue");

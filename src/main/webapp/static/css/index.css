@@ -555,11 +555,38 @@ iframe {
 .blue .logo,
 .blue .hideMenu {
     background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
+    color: #ffffff !important;
+}
+
+.blue .logo {
+    color: #ffffff !important;
+}
+
+.blue .logo:hover {
+    color: #ffffff !important;
 }
 
 .blue .layui-layout-admin .layui-side {
     background-color: #ffffff !important;
     border-right: 1px solid #e6efff;
+}
+
+.blue .layui-nav-tree,
+.blue .layui-nav-tree .layui-nav-itemed,
+.blue .layui-nav-tree .layui-nav-child,
+.blue .layui-nav-tree .layui-nav-child dd,
+.blue .layui-nav-tree .layui-nav-child a,
+.blue .layui-nav-tree .layui-nav-itemed .layui-nav-child a {
+    background-color: #ffffff !important;
+}
+
+.blue .layui-nav-item.layui-nav-itemed {
+    background-color: #f5f8ff !important;
+}
+
+.blue .layui-nav-itemed .layui-nav-child a {
+    background-color: #ffffff !important;
 }
 
 .blue .layui-layout-admin .layui-side .layui-nav-item a,
