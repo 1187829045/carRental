@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"path/filepath"
+	"runtime"
 
 	"carRental/internal/config"
 	"carRental/internal/db"
@@ -13,13 +13,14 @@ import (
 )
 
 func main() {
-	projectRoot, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("getwd: %v", err)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		log.Fatalf("failed to get caller info")
 	}
-	projectRoot, err = filepath.Abs(projectRoot)
+	projectRoot := filepath.Dir(filepath.Dir(filepath.Dir(filename)))
+	projectRoot, err := filepath.Abs(projectRoot)
 	if err != nil {
-		log.Fatalf("abs wd: %v", err)
+		log.Fatalf("abs project root: %v", err)
 	}
 
 	cfg, err := config.Load(projectRoot)

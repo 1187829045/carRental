@@ -139,7 +139,7 @@ func jdbcToMySQLDSN(user, pass, jdbcURL string) (string, error) {
 		if len(vs) == 0 {
 			continue
 		}
-		if k == "useUnicode" || k == "characterEncoding" || k == "serverTimezone" {
+		if k == "useUnicode" || k == "characterEncoding" || k == "serverTimezone" || k == "useSSL" {
 			continue
 		}
 		cfg.Params[k] = vs[0]
