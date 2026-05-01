@@ -208,22 +208,30 @@ iframe {
     border-bottom: 2px solid rgba(47, 128, 255, 0.35);
 }
 
+.header .layui-main,
+.header .layui-main.mag0 {
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
+}
+
 .logo {
-    color: #fff !important;
+    color: #ffffff !important;
+    display: block;
     float: left;
     line-height: 60px;
     font-size: 20px;
     padding: 0 25px;
     text-align: center;
     width: 135px;
-    background: transparent !important;
-    background-color: transparent !important;
+    height: 50px;
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
 }
 
 .logo cite,
 .logo span,
 .logo i {
-    color: #fff !important;
+    color: #ffffff !important;
 }
 
 .hideMenu {
@@ -236,7 +244,8 @@ iframe {
     text-align: center;
     padding: 5px 5px;
     color: #fff;
-    background-color: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
 }
 
 .hideMenu:hover {
@@ -824,4 +833,39 @@ iframe {
 
 .hideMenu {
     margin-top: 10px;
+}
+
+/* 强制将仍然发黑的区域统一成蓝色 */
+.logo,
+.blue .logo,
+.layui-layout-admin .layui-header .logo {
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
+}
+
+.layui-tab-title .layui-this,
+.blue .layui-tab-title .layui-this {
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
+    background-color: #2f80ff !important;
+    color: #fff !important;
+}
+
+.layui-nav-item.layui-nav-itemed,
+.layui-nav-tree .layui-nav-child,
+.layui-nav-tree .layui-nav-child dd,
+.layui-nav-tree .layui-nav-child a,
+.layui-nav-itemed .layui-nav-child a,
+.blue .layui-nav-item.layui-nav-itemed,
+.blue .layui-nav-tree .layui-nav-child,
+.blue .layui-nav-tree .layui-nav-child dd,
+.blue .layui-nav-tree .layui-nav-child a {
+    background-color: #2f80ff !important;
+    color: #ffffff !important;
+}
+
+.layui-nav-tree .layui-nav-child a:hover,
+.layui-nav-tree .layui-nav-child dd.layui-this a,
+.layui-nav-tree .layui-nav-itemed > a {
+    background-color: #6bb6ff !important;
+    color: #ffffff !important;
 }

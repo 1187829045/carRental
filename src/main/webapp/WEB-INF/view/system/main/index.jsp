@@ -43,9 +43,9 @@
     <!-- 顶部 -->
     <div class="layui-header header">
         <div class="layui-main mag0">
-            <a href="#" class="logo">汽车租赁</a>
+            <a href="#" class="logo" style="display:block;height:50px;background:linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%);background-color:#2f80ff;color:#fff;">汽车租赁</a>
             <!-- 显示/隐藏菜单 icon-caidan -->
-            <a href="javascript:;" class="seraph hideMenu icon-caidan"></a>
+            <a href="javascript:;" class="seraph hideMenu icon-caidan" style="background:linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%);background-color:#2f80ff;color:#fff;"></a>
             <!-- 顶部右侧菜单 -->
             <ul class="layui-nav top_menu">
 <%--                <li class="layui-nav-item" pc>--%>
