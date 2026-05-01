@@ -38,7 +38,7 @@
         }
     </style>
 </head>
-<body class="main_body">
+<body class="main_body blue">
 <div class="layui-layout layui-layout-admin">
     <!-- 顶部 -->
     <div class="layui-header header">

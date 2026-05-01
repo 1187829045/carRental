@@ -544,11 +544,78 @@ iframe {
 
 /*蓝色*/
 .blue .layui-layout-admin .layui-header {
-    background-color: #3396d8 !important;
+    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%) !important;
 }
 
 .blue .layui-bg-black, .blue .hideMenu {
-    background-color: #146aa2 !important;
+    background-color: transparent !important;
+}
+
+.blue .header,
+.blue .logo,
+.blue .hideMenu {
+    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%) !important;
+}
+
+.blue .layui-layout-admin .layui-side {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e6efff;
+}
+
+.blue .layui-layout-admin .layui-side .layui-nav-item a,
+.blue .layui-layout-admin .layui-side .layui-nav-item a span,
+.blue .layui-layout-admin .layui-side .layui-nav-item a cite {
+    color: #1f2d3d !important;
+}
+
+.blue .user-photo p {
+    color: #1f2d3d;
+}
+
+.blue .user-photo a.img img {
+    border-color: #cfe2ff;
+    box-shadow: 0 0 24px rgba(11, 92, 255, 0.18);
+}
+
+.blue .component .layui-input {
+    background: rgba(11, 92, 255, 0.06);
+}
+
+.blue .layui-nav-item.layui-nav-itemed {
+    background-color: #f5f8ff !important;
+}
+
+.blue .layui-nav-itemed:before {
+    background-color: #1677ff;
+}
+
+.blue .layui-nav-tree .layui-nav-item a:hover,
+.blue .layui-nav-tree .layui-nav-itemed > a {
+    background-color: #e8f1ff !important;
+}
+
+.blue .layui-nav-tree .layui-nav-child a {
+    background-color: #ffffff !important;
+}
+
+.blue .layui-nav-tree .layui-nav-child dd.layui-this a {
+    background-color: #e8f1ff !important;
+    color: #0b5cff !important;
+}
+
+.blue .layui-body {
+    border-top: 5px solid #2d8cff;
+    border-left: 2px solid #2d8cff;
+    background: #f5f8ff;
+}
+
+.blue .layui-tab-title .layui-this {
+    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%);
+    color: #fff;
+}
+
+.blue .footer {
+    border-left: 2px solid #2d8cff;
 }
 
 /*自定义*/
@@ -562,8 +629,12 @@ iframe {
     float: left;
 }
 
-.orange .layui-nav-tree .layui-nav-child a, .blue .layui-nav-tree .layui-nav-child a {
+.orange .layui-nav-tree .layui-nav-child a {
     color: #fff;
+}
+
+.blue .layui-nav-tree .layui-nav-child a {
+    color: #1f2d3d;
 }
 
 .orange .top_menu.layui-nav .layui-nav-more, .blue .top_menu.layui-nav .layui-nav-more {

@@ -1,5 +1,5 @@
 /*公共样式*/
-.childrenBody{ padding:10px;}
+.childrenBody{ padding:14px; background:#f5f8ff; color:#1f2d3d;}
 .layui-table-view{ margin:0 !important;}
 .magb0{margin-bottom:0 !important;}
 .magt0{ margin-top:0 !important;}
@@ -23,6 +23,93 @@
 .loginBody .layui-input-focus .layui-input::-moz-placeholder{transition: color 0.2s linear 0.2s;}
 .loginBody .layui-input-focus .layui-input:-ms-input-placeholder{transition: color 0.2s linear 0.2s;}
 .loginBody .layui-input-focus .layui-input::placeholder{transition: color 0.2s linear 0.2s;-webkit-transition: color 0.2s linear 0.2s;}
+
+:root{
+    --primary:#1677ff;
+    --primary-dark:#0b5cff;
+    --primary-soft:#e8f1ff;
+    --border:#dbe7ff;
+    --text:#1f2d3d;
+}
+
+.childrenBody .layui-elem-field,
+.childrenBody .layui-elem-quote,
+.childrenBody .layui-table-view{
+    border-color: var(--border) !important;
+}
+
+.childrenBody fieldset.layui-elem-field.layui-field-title{
+    margin-top: 14px !important;
+}
+
+.childrenBody .layui-field-title legend{
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.childrenBody .layui-form-label{
+    color: var(--text);
+}
+
+.childrenBody .layui-input,
+.childrenBody .layui-textarea,
+.childrenBody .layui-select-title input{
+    border-color: var(--border) !important;
+    border-radius: 10px;
+}
+
+.childrenBody .layui-input:focus,
+.childrenBody .layui-textarea:focus{
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+.childrenBody .layui-btn{
+    border-radius: 10px;
+}
+
+.childrenBody .layui-btn,
+.childrenBody .layui-btn-normal{
+    background-color: var(--primary);
+}
+
+.childrenBody .layui-btn:hover,
+.childrenBody .layui-btn-normal:hover{
+    background-color: var(--primary-dark);
+}
+
+.childrenBody .layui-btn-primary{
+    background-color: #fff;
+    border-color: var(--border) !important;
+    color: var(--text);
+}
+
+.childrenBody .layui-btn-primary:hover{
+    border-color: var(--primary) !important;
+    color: var(--primary-dark);
+}
+
+.childrenBody .layui-form-checked[lay-skin=primary] i{
+    border-color: var(--primary) !important;
+    background-color: var(--primary) !important;
+}
+
+.childrenBody .layui-form-onswitch{
+    border-color: var(--primary) !important;
+    background-color: var(--primary) !important;
+}
+
+.childrenBody .layui-form-select dl dd.layui-this{
+    background-color: var(--primary) !important;
+}
+
+.childrenBody .layui-table thead tr{
+    background-color: #f0f6ff;
+}
+
+.childrenBody .layui-laypage .layui-laypage-curr .layui-laypage-em{
+    background-color: var(--primary) !important;
+}
 /*后台首页*/
 .panel_box{ margin-bottom:5px;}
 .panel{ text-align:center; height:90px;}
