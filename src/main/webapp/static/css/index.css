@@ -544,7 +544,7 @@ iframe {
 
 /*蓝色*/
 .blue .layui-layout-admin .layui-header {
-    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%) !important;
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
 }
 
 .blue .layui-bg-black, .blue .hideMenu {
@@ -554,7 +554,7 @@ iframe {
 .blue .header,
 .blue .logo,
 .blue .hideMenu {
-    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%) !important;
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%) !important;
 }
 
 .blue .layui-layout-admin .layui-side {
@@ -586,7 +586,7 @@ iframe {
 }
 
 .blue .layui-nav-itemed:before {
-    background-color: #1677ff;
+    background-color: #2f80ff;
 }
 
 .blue .layui-nav-tree .layui-nav-item a:hover,
@@ -600,22 +600,35 @@ iframe {
 
 .blue .layui-nav-tree .layui-nav-child dd.layui-this a {
     background-color: #e8f1ff !important;
-    color: #0b5cff !important;
+    color: #1d6fff !important;
 }
 
 .blue .layui-body {
-    border-top: 5px solid #2d8cff;
-    border-left: 2px solid #2d8cff;
+    border-top: 5px solid #6bb6ff;
+    border-left: 2px solid #6bb6ff;
     background: #f5f8ff;
 }
 
 .blue .layui-tab-title .layui-this {
-    background: linear-gradient(90deg, #0b5cff 0%, #2d8cff 100%);
+    background: linear-gradient(90deg, #2f80ff 0%, #6bb6ff 100%);
     color: #fff;
 }
 
 .blue .footer {
-    border-left: 2px solid #2d8cff;
+    border-left: 2px solid #6bb6ff;
+}
+
+.blue .topLevelMenus .layui-nav-item.layui-this {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.blue .top_menu .layui-nav-bar,
+.blue .mobileTopLevelMenus .layui-nav-bar {
+    background-color: rgba(47, 128, 255, 0.55);
+}
+
+.blue .layui-tab-title li:hover {
+    background-color: rgba(47, 128, 255, 0.08);
 }
 
 /*自定义*/
@@ -698,7 +711,7 @@ iframe {
         line-height: 40px;
         border-radius: 2px;
         text-align: center;
-        background-color: rgba(0, 0, 0, .7);
+        background-color: rgba(47, 128, 255, 0.65);
         color: #fff;
     }
 
@@ -709,7 +722,7 @@ iframe {
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: rgba(0, 0, 0, .8);
+        background-color: rgba(17, 47, 102, 0.55);
         z-index: 999;
     }
 

@@ -25,9 +25,9 @@
 .loginBody .layui-input-focus .layui-input::placeholder{transition: color 0.2s linear 0.2s;-webkit-transition: color 0.2s linear 0.2s;}
 
 :root{
-    --primary:#1677ff;
-    --primary-dark:#0b5cff;
-    --primary-soft:#e8f1ff;
+    --primary:#2f80ff;
+    --primary-dark:#1d6fff;
+    --primary-soft:#eef6ff;
     --border:#dbe7ff;
     --text:#1f2d3d;
 }

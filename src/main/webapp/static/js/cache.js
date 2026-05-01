@@ -173,6 +173,11 @@ layui.use(['form','jquery',"layer"],function() {
     //更换皮肤
     function skins(){
         var skin = window.sessionStorage.getItem("skin");
+        if(!skin){
+            window.sessionStorage.setItem("skin","blue");
+            window.sessionStorage.setItem("skinValue","蓝色");
+            skin = "blue";
+        }
         if(skin){  //如果更换过皮肤
             if(window.sessionStorage.getItem("skinValue") != "自定义"){
                 $("body").addClass(window.sessionStorage.getItem("skin"));
