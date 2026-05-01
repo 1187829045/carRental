@@ -176,7 +176,6 @@
             , url: '${yeqifu}/menu/loadAllMenu.action' //数据接口
             , title: '用户数据表'//数据导出来的标题
             , toolbar: "#menuToolBar"   //表格的工具条
-            , height: 'full-148'
             , cellMinWidth: 100 //设置列的最小默认宽度
             , page: true  //是否启用分页
             , cols: [[   //列表数据
@@ -204,6 +203,10 @@
                 , {fixed: 'right', title: '操作', toolbar: '#menuBar', width: 120, align: 'center'}
             ]],
             done:function (data, curr, count) {
+                if (data && data.code != 0) {
+                    layer.msg(data.msg || "菜单数据加载失败");
+                    return;
+                }
                 //不是第一页时，如果当前返回的数据为0那么就返回上一页
                 if(data.data.length==0&&curr!=1){
                     tableIns.reload({
@@ -214,6 +217,10 @@
                 }
             }
         })
+
+        $(document).ajaxError(function () {
+            layer.msg("接口请求失败，请检查后端服务与路由配置");
+        });
 
         //模糊查询
         $("#doSearch").click(function () {

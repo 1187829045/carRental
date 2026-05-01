@@ -38,6 +38,10 @@
             var form = layui.form;
             var dtree = layui.dtree;
 
+			$(document).ajaxError(function () {
+				layer.msg("接口请求失败，请检查后端服务与路由配置");
+			});
+
             // 初始化树
             menuTree = dtree.render({
                 elem: "#menuTree",
@@ -56,4 +60,3 @@
     </script>
 </body>
 </html>
-

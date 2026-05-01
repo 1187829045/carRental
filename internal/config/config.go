@@ -15,17 +15,20 @@ import (
 
 type Config struct {
 	Addr      string // e.g. ":8080"
-	BasePath  string // corresponds to JSP `${yeqifu}`; usually empty when served at root
+	BasePath  string // corresponds to JSP `${yeqifu}`; e.g. "/carRental" for legacy deployment
 	ViewRoot  string // JSP root, e.g. "src/main/webapp/WEB-INF/view"
 	StaticDir string // static root to serve at /static, e.g. "src/main/webapp/static"
 
 	MySQLDSN string // root:pwd@tcp(host:port)/db?parseTime=true&loc=Local&charset=utf8
+
+	MonitorUser string // druid replacement basic auth user
+	MonitorPass string // druid replacement basic auth pass
 }
 
 func Load(projectRoot string) (Config, error) {
 	cfg := Config{
 		Addr:      envOr("ADDR", ":8080"),
-		BasePath:  envOr("BASE_PATH", ""),
+		BasePath:  envOr("BASE_PATH", "/carRental"),
 		ViewRoot:  filepath.Join(projectRoot, "src/main/webapp/WEB-INF/view"),
 		StaticDir: filepath.Join(projectRoot, "src/main/webapp/static"),
 	}
@@ -48,6 +51,8 @@ func Load(projectRoot string) (Config, error) {
 		return Config{}, fmt.Errorf("parse jdbc url: %w", err)
 	}
 	cfg.MySQLDSN = envOr("MYSQL_DSN", dsn)
+	cfg.MonitorUser = envOr("MONITOR_USER", user)
+	cfg.MonitorPass = envOr("MONITOR_PASS", pass)
 	return cfg, nil
 }
 
@@ -129,8 +134,15 @@ func jdbcToMySQLDSN(user, pass, jdbcURL string) (string, error) {
 	cfg.DBName = dbName
 	cfg.ParseTime = true
 	cfg.Loc = time.Local
-	cfg.Params = map[string]string{
-		"charset": params.Get("charset"),
+	cfg.Params = map[string]string{"charset": params.Get("charset")}
+	for k, vs := range q {
+		if len(vs) == 0 {
+			continue
+		}
+		if k == "useUnicode" || k == "characterEncoding" || k == "serverTimezone" {
+			continue
+		}
+		cfg.Params[k] = vs[0]
 	}
 	return cfg.FormatDSN(), nil
 }

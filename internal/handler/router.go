@@ -8,6 +8,7 @@ import (
 	"image/jpeg"
 	"math/rand/v2"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -39,6 +40,7 @@ func NewRouter(d Deps) *gin.Engine {
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery())
+	basePath := normalizeBasePath(d.Cfg.BasePath)
 
 	store := cookie.NewStore([]byte("carRental-secret-change-me"))
 	store.Options(sessions.Options{
@@ -51,9 +53,18 @@ func NewRouter(d Deps) *gin.Engine {
 
 	// Static assets: JSP uses `${yeqifu}/static/...`
 	r.Static("/static", d.Cfg.StaticDir)
+	if basePath != "" {
+		r.Static(path.Join(basePath, "/static"), d.Cfg.StaticDir)
+	}
+
+	root := r.Group(basePath)
 
 	// Lightweight replacement for the original druid monitor entry.
-	r.GET("/druid/", func(c *gin.Context) {
+	druid := root.Group("/druid")
+	if d.Cfg.MonitorUser != "" {
+		druid.Use(gin.BasicAuth(gin.Accounts{d.Cfg.MonitorUser: d.Cfg.MonitorPass}))
+	}
+	druid.GET("/", func(c *gin.Context) {
 		if d.SystemService == nil {
 			c.String(http.StatusOK, "druid replacement unavailable")
 			return
@@ -75,22 +86,31 @@ func NewRouter(d Deps) *gin.Engine {
 			"</table></body></html>"
 		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 	})
+	druid.GET("/index.html", func(c *gin.Context) {
+		c.Redirect(http.StatusFound, withBase(basePath, "/druid/"))
+	})
 
 	// Root: behave like original index.jsp forward, and use it as logout target.
 	r.GET("/", func(c *gin.Context) {
 		sess := sessions.Default(c)
 		sess.Clear()
 		_ = sess.Save()
-		c.Redirect(http.StatusFound, "/login/toLogin.action")
+		c.Redirect(http.StatusFound, withBase(basePath, "/login/toLogin.action"))
+	})
+	root.GET("/", func(c *gin.Context) {
+		sess := sessions.Default(c)
+		sess.Clear()
+		_ = sess.Save()
+		c.Redirect(http.StatusFound, withBase(basePath, "/login/toLogin.action"))
 	})
 
 	// Login flow
-	r.GET("/login/toLogin.action", func(c *gin.Context) {
+	root.GET("/login/toLogin.action", func(c *gin.Context) {
 		renderView(c, d.Cfg, "system/main/login", map[string]any{
 			"error": "",
 		})
 	})
-	r.POST("/login/login.action", func(c *gin.Context) {
+	root.POST("/login/login.action", func(c *gin.Context) {
 		loginName := c.PostForm("loginname")
 		pwd := c.PostForm("pwd")
 		code := c.PostForm("code")
@@ -122,7 +142,7 @@ func NewRouter(d Deps) *gin.Engine {
 		_ = d.AuthService.AddLoginLog(c.Request.Context(), u.RealName+"-"+u.LoginName, c.ClientIP(), time.Now())
 		renderViewWithUser(c, d.Cfg, "system/main/index", *u, nil)
 	})
-	r.GET("/login/getCode.action", func(c *gin.Context) {
+	root.GET("/login/getCode.action", func(c *gin.Context) {
 		code := randomDigits(4)
 		sess := sessions.Default(c)
 		sess.Set("code", code)
@@ -133,14 +153,14 @@ func NewRouter(d Deps) *gin.Engine {
 		_ = jpeg.Encode(c.Writer, img, &jpeg.Options{Quality: 85})
 	})
 
-	authed := r.Group("/")
-	authed.Use(requireLogin())
+	authed := root.Group("/")
+	authed.Use(requireLogin(basePath))
 
 	// Desk
 	authed.GET("/desk/toDeskManager.action", func(c *gin.Context) {
 		u, ok := getSessionUser(c)
 		if !ok {
-			c.Redirect(http.StatusFound, "/login/toLogin.action")
+			c.Redirect(http.StatusFound, withBase(basePath, "/login/toLogin.action"))
 			return
 		}
 		renderViewWithUser(c, d.Cfg, "system/main/deskManager", u, nil)
@@ -199,15 +219,22 @@ func NewRouter(d Deps) *gin.Engine {
 	return r
 }
 
-func requireLogin() gin.HandlerFunc {
+func requireLogin(basePath string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Allow login endpoints even under group (defensive).
-		if strings.HasPrefix(c.Request.URL.Path, "/login/") {
+		p := c.Request.URL.Path
+		basePath = normalizeBasePath(basePath)
+		if basePath != "" && strings.HasPrefix(p, basePath) {
+			p = strings.TrimPrefix(p, basePath)
+			if p == "" {
+				p = "/"
+			}
+		}
+		if strings.HasPrefix(p, "/login/") {
 			c.Next()
 			return
 		}
 		if _, ok := getSessionUser(c); !ok {
-			c.Redirect(http.StatusFound, "/login/toLogin.action")
+			c.Redirect(http.StatusFound, withBase(basePath, "/login/toLogin.action"))
 			c.Abort()
 			return
 		}
@@ -226,7 +253,7 @@ func pageWithUser(cfg config.Config, viewPath string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		u, ok := getSessionUser(c)
 		if !ok {
-			c.Redirect(http.StatusFound, "/login/toLogin.action")
+			c.Redirect(http.StatusFound, withBase(normalizeBasePath(cfg.BasePath), "/login/toLogin.action"))
 			return
 		}
 		renderViewWithUser(c, cfg, viewPath, u, nil)
@@ -235,7 +262,7 @@ func pageWithUser(cfg config.Config, viewPath string) gin.HandlerFunc {
 
 func renderView(c *gin.Context, cfg config.Config, viewPath string, extra map[string]any) {
 	ctx := map[string]any{
-		"yeqifu": cfg.BasePath,
+		"yeqifu": normalizeBasePath(cfg.BasePath),
 	}
 	for k, v := range extra {
 		ctx[k] = v
@@ -250,7 +277,7 @@ func renderView(c *gin.Context, cfg config.Config, viewPath string, extra map[st
 
 func renderViewWithUser(c *gin.Context, cfg config.Config, viewPath string, u model.User, extra map[string]any) {
 	ctx := map[string]any{
-		"yeqifu": cfg.BasePath,
+		"yeqifu": normalizeBasePath(cfg.BasePath),
 		"user": map[string]any{
 			"userid":    u.UserID,
 			"loginname": u.LoginName,
@@ -267,6 +294,28 @@ func renderViewWithUser(c *gin.Context, cfg config.Config, viewPath string, u mo
 		return
 	}
 	c.Data(http.StatusOK, "text/html; charset=utf-8", b)
+}
+
+func normalizeBasePath(p string) string {
+	p = strings.TrimSpace(p)
+	if p == "" || p == "/" {
+		return ""
+	}
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return strings.TrimRight(p, "/")
+}
+
+func withBase(basePath, p string) string {
+	basePath = normalizeBasePath(basePath)
+	if basePath == "" {
+		return p
+	}
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return basePath + p
 }
 
 func randomDigits(n int) string {
