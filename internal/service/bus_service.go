@@ -45,15 +45,19 @@ func (s *BusService) QueryCars(ctx context.Context, q map[string]string) (int64,
 		args = append(args, v)
 	}
 	if v := strings.TrimSpace(q["opername"]); v != "" {
-		where = append(where, "opername=?")
+		where = append(where, "su.realname=?")
+		args = append(args, v)
+	}
+	if v := strings.TrimSpace(q["operid"]); v != "" {
+		where = append(where, "bc.operid=?")
 		args = append(args, v)
 	}
 	wsql := strings.Join(where, " AND ")
 	var count int64
-	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_car WHERE "+wsql, args...).Scan(&count); err != nil {
+	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_car bc LEFT JOIN sys_user su ON bc.operid = su.userid WHERE "+wsql, args...).Scan(&count); err != nil {
 		return 0, nil, err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT carnumber,cartype,color,price,rentprice,deposit,isrenting,description,carimg,createtime,opername FROM bus_car WHERE `+wsql+` ORDER BY createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
+	rows, err := s.DB.QueryContext(ctx, `SELECT bc.carnumber,bc.cartype,bc.color,bc.price,bc.rentprice,bc.deposit,bc.isrenting,bc.description,bc.carimg,bc.createtime,bc.operid,su.realname FROM bus_car bc LEFT JOIN sys_user su ON bc.operid = su.userid WHERE `+wsql+` ORDER BY bc.createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -62,7 +66,7 @@ func (s *BusService) QueryCars(ctx context.Context, q map[string]string) (int64,
 	for rows.Next() {
 		var x model.Car
 		var opername sql.NullString
-		if err := rows.Scan(&x.CarNumber, &x.CarType, &x.Color, &x.Price, &x.RentPrice, &x.Deposit, &x.IsRenting, &x.Description, &x.CarImg, &x.CreateTime, &opername); err != nil {
+		if err := rows.Scan(&x.CarNumber, &x.CarType, &x.Color, &x.Price, &x.RentPrice, &x.Deposit, &x.IsRenting, &x.Description, &x.CarImg, &x.CreateTime, &x.OperId, &opername); err != nil {
 			return 0, nil, err
 		}
 		if opername.Valid {
@@ -74,10 +78,10 @@ func (s *BusService) QueryCars(ctx context.Context, q map[string]string) (int64,
 }
 
 func (s *BusService) GetCar(ctx context.Context, carnumber string) (*model.Car, error) {
-	row := s.DB.QueryRowContext(ctx, `SELECT carnumber,cartype,color,price,rentprice,deposit,isrenting,description,carimg,createtime,opername FROM bus_car WHERE carnumber=?`, carnumber)
+	row := s.DB.QueryRowContext(ctx, `SELECT bc.carnumber,bc.cartype,bc.color,bc.price,bc.rentprice,bc.deposit,bc.isrenting,bc.description,bc.carimg,bc.createtime,bc.operid,su.realname FROM bus_car bc LEFT JOIN sys_user su ON bc.operid = su.userid WHERE bc.carnumber=?`, carnumber)
 	var x model.Car
 	var opername sql.NullString
-	if err := row.Scan(&x.CarNumber, &x.CarType, &x.Color, &x.Price, &x.RentPrice, &x.Deposit, &x.IsRenting, &x.Description, &x.CarImg, &x.CreateTime, &opername); err != nil {
+	if err := row.Scan(&x.CarNumber, &x.CarType, &x.Color, &x.Price, &x.RentPrice, &x.Deposit, &x.IsRenting, &x.Description, &x.CarImg, &x.CreateTime, &x.OperId, &opername); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -137,8 +141,8 @@ func (s *BusService) AddCar(ctx context.Context, x model.Car) error {
 	if x.CreateTime.IsZero() {
 		x.CreateTime = time.Now()
 	}
-	_, err = s.DB.ExecContext(ctx, `INSERT INTO bus_car(carnumber,cartype,color,price,rentprice,deposit,isrenting,description,carimg,createtime,opername) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
-		x.CarNumber, x.CarType, x.Color, x.Price, x.RentPrice, x.Deposit, x.IsRenting, x.Description, carimg, x.CreateTime, x.OperName)
+	_, err = s.DB.ExecContext(ctx, `INSERT INTO bus_car(carnumber,cartype,color,price,rentprice,deposit,isrenting,description,carimg,createtime,operid) VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+		x.CarNumber, x.CarType, x.Color, x.Price, x.RentPrice, x.Deposit, x.IsRenting, x.Description, carimg, x.CreateTime, x.OperId)
 	return err
 }
 
@@ -157,8 +161,8 @@ func (s *BusService) UpdateCar(ctx context.Context, x model.Car) error {
 		}
 		x.CarImg = carimg
 	}
-	_, err := s.DB.ExecContext(ctx, `UPDATE bus_car SET cartype=?,color=?,price=?,rentprice=?,deposit=?,isrenting=?,description=?,carimg=?,opername=? WHERE carnumber=?`,
-		x.CarType, x.Color, x.Price, x.RentPrice, x.Deposit, x.IsRenting, x.Description, x.CarImg, x.OperName, x.CarNumber)
+	_, err := s.DB.ExecContext(ctx, `UPDATE bus_car SET cartype=?,color=?,price=?,rentprice=?,deposit=?,isrenting=?,description=?,carimg=? WHERE carnumber=?`,
+		x.CarType, x.Color, x.Price, x.RentPrice, x.Deposit, x.IsRenting, x.Description, x.CarImg, x.CarNumber)
 	return err
 }
 
@@ -297,15 +301,19 @@ func (s *BusService) QueryRents(ctx context.Context, q map[string]string) (int64
 		args = append(args, v)
 	}
 	if v := strings.TrimSpace(q["opername"]); v != "" {
-		where = append(where, "opername=?")
+		where = append(where, "su.realname=?")
+		args = append(args, v)
+	}
+	if v := strings.TrimSpace(q["operid"]); v != "" {
+		where = append(where, "br.operid=?")
 		args = append(args, v)
 	}
 	wsql := strings.Join(where, " AND ")
 	var count int64
-	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_rent WHERE "+wsql, args...).Scan(&count); err != nil {
+	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_rent br LEFT JOIN sys_user su ON br.operid = su.userid WHERE "+wsql, args...).Scan(&count); err != nil {
 		return 0, nil, err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT rentid,price,begindate,returndate,rentflag,identity,carnumber,opername,createtime FROM bus_rent WHERE `+wsql+` ORDER BY createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
+	rows, err := s.DB.QueryContext(ctx, `SELECT br.rentid,br.price,br.begindate,br.returndate,br.rentflag,br.identity,br.carnumber,br.operid,su.realname,br.createtime FROM bus_rent br LEFT JOIN sys_user su ON br.operid = su.userid WHERE `+wsql+` ORDER BY br.createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -313,8 +321,12 @@ func (s *BusService) QueryRents(ctx context.Context, q map[string]string) (int64
 	var out []model.Rent
 	for rows.Next() {
 		var x model.Rent
-		if err := rows.Scan(&x.RentID, &x.Price, &x.BeginDate, &x.ReturnDate, &x.RentFlag, &x.Identity, &x.CarNumber, &x.OperName, &x.CreateTime); err != nil {
+		var opername sql.NullString
+		if err := rows.Scan(&x.RentID, &x.Price, &x.BeginDate, &x.ReturnDate, &x.RentFlag, &x.Identity, &x.CarNumber, &x.OperId, &opername, &x.CreateTime); err != nil {
 			return 0, nil, err
+		}
+		if opername.Valid {
+			x.OperName = opername.String
 		}
 		out = append(out, x)
 	}
@@ -322,13 +334,17 @@ func (s *BusService) QueryRents(ctx context.Context, q map[string]string) (int64
 }
 
 func (s *BusService) GetRent(ctx context.Context, rentid string) (*model.Rent, error) {
-	row := s.DB.QueryRowContext(ctx, `SELECT rentid,price,begindate,returndate,rentflag,identity,carnumber,opername,createtime FROM bus_rent WHERE rentid=?`, rentid)
+	row := s.DB.QueryRowContext(ctx, `SELECT br.rentid,br.price,br.begindate,br.returndate,br.rentflag,br.identity,br.carnumber,br.operid,su.realname,br.createtime FROM bus_rent br LEFT JOIN sys_user su ON br.operid = su.userid WHERE br.rentid=?`, rentid)
 	var x model.Rent
-	if err := row.Scan(&x.RentID, &x.Price, &x.BeginDate, &x.ReturnDate, &x.RentFlag, &x.Identity, &x.CarNumber, &x.OperName, &x.CreateTime); err != nil {
+	var opername sql.NullString
+	if err := row.Scan(&x.RentID, &x.Price, &x.BeginDate, &x.ReturnDate, &x.RentFlag, &x.Identity, &x.CarNumber, &x.OperId, &opername, &x.CreateTime); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
+	}
+	if opername.Valid {
+		x.OperName = opername.String
 	}
 	return &x, nil
 }
@@ -363,8 +379,8 @@ func (s *BusService) SaveRent(ctx context.Context, x model.Rent) error {
 	if x.CreateTime.IsZero() {
 		x.CreateTime = time.Now()
 	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO bus_rent(rentid,price,begindate,returndate,rentflag,identity,carnumber,opername,createtime) VALUES(?,?,?,?,?,?,?,?,?)`,
-		x.RentID, x.Price, x.BeginDate, x.ReturnDate, x.RentFlag, x.Identity, x.CarNumber, x.OperName, x.CreateTime); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO bus_rent(rentid,price,begindate,returndate,rentflag,identity,carnumber,operid,createtime) VALUES(?,?,?,?,?,?,?,?,?)`,
+		x.RentID, x.Price, x.BeginDate, x.ReturnDate, x.RentFlag, x.Identity, x.CarNumber, x.OperId, x.CreateTime); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE bus_car SET isrenting=? WHERE carnumber=?`, 2, x.CarNumber); err != nil {
@@ -374,8 +390,8 @@ func (s *BusService) SaveRent(ctx context.Context, x model.Rent) error {
 }
 
 func (s *BusService) UpdateRent(ctx context.Context, x model.Rent) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE bus_rent SET price=?,begindate=?,returndate=?,rentflag=?,identity=?,carnumber=?,opername=? WHERE rentid=?`,
-		x.Price, x.BeginDate, x.ReturnDate, x.RentFlag, x.Identity, x.CarNumber, x.OperName, x.RentID)
+	_, err := s.DB.ExecContext(ctx, `UPDATE bus_rent SET price=?,begindate=?,returndate=?,rentflag=?,identity=?,carnumber=?,operid=? WHERE rentid=?`,
+		x.Price, x.BeginDate, x.ReturnDate, x.RentFlag, x.Identity, x.CarNumber, x.OperId, x.RentID)
 	return err
 }
 
@@ -440,15 +456,19 @@ func (s *BusService) QueryChecks(ctx context.Context, q map[string]string) (int6
 		args = append(args, *t)
 	}
 	if v := strings.TrimSpace(q["opername"]); v != "" {
-		where = append(where, "opername=?")
+		where = append(where, "su.realname=?")
+		args = append(args, v)
+	}
+	if v := strings.TrimSpace(q["operid"]); v != "" {
+		where = append(where, "bc.operid=?")
 		args = append(args, v)
 	}
 	wsql := strings.Join(where, " AND ")
 	var count int64
-	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_check WHERE "+wsql, args...).Scan(&count); err != nil {
+	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_check bc LEFT JOIN sys_user su ON bc.operid = su.userid WHERE "+wsql, args...).Scan(&count); err != nil {
 		return 0, nil, err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT checkid,checkdate,checkdesc,problem,paymoney,opername,rentid,createtime FROM bus_check WHERE `+wsql+` ORDER BY createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
+	rows, err := s.DB.QueryContext(ctx, `SELECT bc.checkid,bc.checkdate,bc.checkdesc,bc.problem,bc.paymoney,bc.operid,su.realname,bc.rentid,bc.createtime FROM bus_check bc LEFT JOIN sys_user su ON bc.operid = su.userid WHERE `+wsql+` ORDER BY bc.createtime DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -456,8 +476,12 @@ func (s *BusService) QueryChecks(ctx context.Context, q map[string]string) (int6
 	var out []model.Check
 	for rows.Next() {
 		var x model.Check
-		if err := rows.Scan(&x.CheckID, &x.CheckDate, &x.CheckDesc, &x.Problem, &x.PayMoney, &x.OperName, &x.RentID, &x.CreateTime); err != nil {
+		var opername sql.NullString
+		if err := rows.Scan(&x.CheckID, &x.CheckDate, &x.CheckDesc, &x.Problem, &x.PayMoney, &x.OperId, &opername, &x.RentID, &x.CreateTime); err != nil {
 			return 0, nil, err
+		}
+		if opername.Valid {
+			x.OperName = opername.String
 		}
 		out = append(out, x)
 	}
@@ -500,8 +524,8 @@ func (s *BusService) SaveCheck(ctx context.Context, x model.Check) error {
 	if x.CreateTime.IsZero() {
 		x.CreateTime = time.Now()
 	}
-	if _, err = tx.ExecContext(ctx, `INSERT INTO bus_check(checkid,checkdate,checkdesc,problem,paymoney,opername,rentid,createtime) VALUES(?,?,?,?,?,?,?,?)`,
-		x.CheckID, x.CheckDate, x.CheckDesc, x.Problem, x.PayMoney, x.OperName, x.RentID, x.CreateTime); err != nil {
+	if _, err = tx.ExecContext(ctx, `INSERT INTO bus_check(checkid,checkdate,checkdesc,problem,paymoney,operid,rentid,createtime) VALUES(?,?,?,?,?,?,?,?)`,
+		x.CheckID, x.CheckDate, x.CheckDesc, x.Problem, x.PayMoney, x.OperId, x.RentID, x.CreateTime); err != nil {
 		return err
 	}
 	var carnumber string
@@ -518,8 +542,8 @@ func (s *BusService) SaveCheck(ctx context.Context, x model.Check) error {
 }
 
 func (s *BusService) UpdateCheck(ctx context.Context, x model.Check) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE bus_check SET checkdate=?,checkdesc=?,problem=?,paymoney=?,opername=?,rentid=? WHERE checkid=?`,
-		x.CheckDate, x.CheckDesc, x.Problem, x.PayMoney, x.OperName, x.RentID, x.CheckID)
+	_, err := s.DB.ExecContext(ctx, `UPDATE bus_check SET checkdate=?,checkdesc=?,problem=?,paymoney=?,operid=?,rentid=? WHERE checkid=?`,
+		x.CheckDate, x.CheckDesc, x.Problem, x.PayMoney, x.OperId, x.RentID, x.CheckID)
 	return err
 }
 func (s *BusService) DeleteCheck(ctx context.Context, checkid string) error {

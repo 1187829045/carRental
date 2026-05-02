@@ -13,6 +13,7 @@ type Car struct {
 	Description string    `json:"description"`
 	CarImg      string    `json:"carimg"`
 	CreateTime  time.Time `json:"createtime"`
+	OperId      int       `json:"operid"`
 	OperName    string    `json:"opername"`
 }
 
@@ -34,6 +35,7 @@ type Rent struct {
 	RentFlag   int        `json:"rentflag"`
 	Identity   string     `json:"identity"`
 	CarNumber  string     `json:"carnumber"`
+	OperId     int        `json:"operid"`
 	OperName   string     `json:"opername"`
 	CreateTime time.Time  `json:"createtime"`
 }
@@ -44,6 +46,7 @@ type Check struct {
 	CheckDesc  string    `json:"checkdesc"`
 	Problem    string    `json:"problem"`
 	PayMoney   float64   `json:"paymoney"`
+	OperId     int       `json:"operid"`
 	OperName   string    `json:"opername"`
 	RentID     string    `json:"rentid"`
 	CreateTime time.Time `json:"createtime"`
