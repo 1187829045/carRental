@@ -117,12 +117,12 @@ h2.method{ font-size:18px; line-height:45px; padding-left:5px;}
 #imgCode img{ position:absolute; top:1px; right:1px; cursor:pointer;}
 
 #imgCode .layui-input{
-    padding-right: 155px;
+    padding-right: 195px;
 }
 
 #imgCode img{
-    width: 140px;
-    height: 34px;
+    width: 180px;
+    height: 50px;
     border-radius: 10px;
     border: 1px solid var(--border);
     background: #fff;

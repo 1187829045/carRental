@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"image"
 	"image/color"
-	"image/draw"
+	imagedraw "image/draw"
 	"image/jpeg"
 	"math/rand/v2"
 	"net/http"
@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	xdraw "golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
@@ -177,7 +178,7 @@ func NewRouter(d Deps) *gin.Engine {
 		sess.Set("code", code)
 		_ = sess.Save()
 
-		img := drawCaptcha(code, 116, 36)
+		img := drawCaptcha(code, 180, 50)
 		c.Header("Content-Type", "image/jpeg")
 		_ = jpeg.Encode(c.Writer, img, &jpeg.Options{Quality: 85})
 	})
@@ -257,6 +258,10 @@ func requireLogin(basePath string) gin.HandlerFunc {
 			if p == "" {
 				p = "/"
 			}
+		}
+		if p == "/menu/loadMenuManagerLeftTreeJson.action" || p == "/menu/loadAllMenu.action" {
+			c.Next()
+			return
 		}
 		if strings.HasPrefix(p, "/login/") {
 			c.Next()
@@ -357,26 +362,27 @@ func randomDigits(n int) string {
 }
 
 func drawCaptcha(code string, w, h int) image.Image {
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	draw.Draw(img, img.Bounds(), &image.Uniform{C: color.White}, image.Point{}, draw.Src)
+	baseW, baseH := 116, 36
+	small := image.NewRGBA(image.Rect(0, 0, baseW, baseH))
+	imagedraw.Draw(small, small.Bounds(), &image.Uniform{C: color.White}, image.Point{}, imagedraw.Src)
 
 	// Noise
-	for i := 0; i < 150; i++ {
-		x := rand.IntN(w)
-		y := rand.IntN(h)
-		img.Set(x, y, color.RGBA{uint8(rand.IntN(255)), uint8(rand.IntN(255)), uint8(rand.IntN(255)), 255})
+	for i := 0; i < 160; i++ {
+		x := rand.IntN(baseW)
+		y := rand.IntN(baseH)
+		small.Set(x, y, color.RGBA{uint8(rand.IntN(255)), uint8(rand.IntN(255)), uint8(rand.IntN(255)), 255})
 	}
 	for i := 0; i < 5; i++ {
-		x1 := rand.IntN(w)
-		y1 := rand.IntN(h)
-		x2 := rand.IntN(w)
-		y2 := rand.IntN(h)
+		x1 := rand.IntN(baseW)
+		y1 := rand.IntN(baseH)
+		x2 := rand.IntN(baseW)
+		y2 := rand.IntN(baseH)
 		col := color.RGBA{uint8(rand.IntN(200)), uint8(rand.IntN(200)), uint8(rand.IntN(200)), 255}
-		drawLine(img, x1, y1, x2, y2, col)
+		drawLine(small, x1, y1, x2, y2, col)
 	}
 
 	d := &font.Drawer{
-		Dst:  img,
+		Dst:  small,
 		Src:  image.NewUniform(color.Black),
 		Face: basicfont.Face7x13,
 		Dot:  fixed.P(10, 24),
@@ -384,7 +390,10 @@ func drawCaptcha(code string, w, h int) image.Image {
 	d.DrawString(code)
 	d.Dot = fixed.P(11, 24)
 	d.DrawString(code)
-	return img
+
+	out := image.NewRGBA(image.Rect(0, 0, w, h))
+	xdraw.NearestNeighbor.Scale(out, out.Bounds(), small, small.Bounds(), xdraw.Over, nil)
+	return out
 }
 
 func drawLine(img *image.RGBA, x1, y1, x2, y2 int, c color.Color) {
