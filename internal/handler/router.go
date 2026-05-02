@@ -534,7 +534,23 @@ func drawCaptcha(code string, w, h int) image.Image {
 
 	out := image.NewRGBA(image.Rect(0, 0, w, h))
 	xdraw.NearestNeighbor.Scale(out, out.Bounds(), small, small.Bounds(), xdraw.Over, nil)
-	return out
+
+	zoomW := int(float64(w) * 1.18)
+	zoomH := int(float64(h) * 1.18)
+	if zoomW < w+1 {
+		zoomW = w + 1
+	}
+	if zoomH < h+1 {
+		zoomH = h + 1
+	}
+	zoomed := image.NewRGBA(image.Rect(0, 0, zoomW, zoomH))
+	xdraw.NearestNeighbor.Scale(zoomed, zoomed.Bounds(), out, out.Bounds(), xdraw.Over, nil)
+
+	offX := (zoomW - w) / 2
+	offY := (zoomH - h) / 2
+	final := image.NewRGBA(image.Rect(0, 0, w, h))
+	imagedraw.Draw(final, final.Bounds(), zoomed, image.Point{X: offX, Y: offY}, imagedraw.Src)
+	return final
 }
 
 func drawLine(img *image.RGBA, x1, y1, x2, y2 int, c color.Color) {
