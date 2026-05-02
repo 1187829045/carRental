@@ -1,5 +1,22 @@
 /*公共样式*/
-.childrenBody{ padding:10px;}
+:root{
+    --ui-primary: #2f80ff;
+    --ui-primary-2: #6db5ff;
+    --ui-bg: #f5f7fb;
+    --ui-card: #ffffff;
+    --ui-border: #e6eefc;
+    --ui-text: #13223a;
+    --ui-muted: #6b7b94;
+    --ui-success: #16a34a;
+    --ui-warning: #d97706;
+    --ui-danger: #dc2626;
+    --ui-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+    --border: var(--ui-border);
+}
+
+html, body{ background: var(--ui-bg); color: var(--ui-text); }
+
+.childrenBody{ padding:16px; background: var(--ui-bg); box-sizing: border-box;}
 .layui-table-view{ margin:0 !important;}
 .magb0{margin-bottom:0 !important;}
 .magt0{ margin-top:0 !important;}
@@ -13,10 +30,66 @@
 .layui-right{text-align:right;}
 .layui-elem-quote.title{ padding:10px 15px; margin-bottom:0;}
 .layui-bg-white{ background-color:#fff !important;}
-.border{ border:1px solid #e6e6e6 !important; padding:10px; border-top:none;}
+.border{ border:1px solid var(--ui-border) !important; padding:14px; border-top:none; border-radius:14px; background:var(--ui-card); box-shadow:0 10px 24px rgba(15, 23, 42, 0.05);}
 .main_btn .layui-btn{ margin:2px 5px 2px 0;}
 .layui-timeline-axis{ left:-4px;}
 .layui-elem-quote{ word-break: break-all;}
+.layui-elem-quote{
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.layui-elem-quote.layui-bg-green{
+    background: linear-gradient(135deg, rgba(47, 128, 255, 0.14), rgba(47, 128, 255, 0.06));
+    border-color: rgba(47, 128, 255, 0.18);
+}
+
+.layui-btn{
+    border-radius: 10px;
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.layui-btn:hover{ transform: translateY(-1px); }
+.layui-btn:active{ transform: translateY(0); }
+
+.layui-btn-primary{ border-color: var(--ui-border) !important; }
+.layui-btn-primary:hover{ border-color: rgba(47, 128, 255, 0.35) !important; box-shadow: 0 10px 20px rgba(47, 128, 255, 0.10); }
+
+.layui-btn-normal{ background-color: var(--ui-primary) !important; }
+.layui-btn-danger{ background-color: var(--ui-danger) !important; }
+
+.layui-btn-disabled, .layui-btn-disabled:hover{ box-shadow: none !important; transform: none !important; }
+
+.layui-input, .layui-textarea{
+    border-radius: 10px;
+    border-color: var(--ui-border);
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.layui-input:focus, .layui-textarea:focus{
+    border-color: rgba(47, 128, 255, 0.55) !important;
+    box-shadow: 0 0 0 3px rgba(47, 128, 255, 0.14);
+}
+
+.layui-form-select .layui-input{ border-radius: 10px; }
+.layui-form-select dl{ border-radius: 12px; border-color: var(--ui-border); box-shadow: var(--ui-shadow); }
+.layui-form-select dl dd:hover{ background: rgba(47, 128, 255, 0.10); }
+
+.layui-form-checked[lay-skin=primary] i{ border-color: var(--ui-primary) !important; background-color: var(--ui-primary) !important; }
+
+.layui-table-view{ border: 1px solid var(--ui-border); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05); }
+.layui-table thead tr{ background: #f8fafc; }
+.layui-table th{ color: #475569; font-weight: 600; }
+.layui-table tr:hover{ background: rgba(47, 128, 255, 0.06); }
+
+.layui-laypage a, .layui-laypage span{ border-radius: 10px; }
+.layui-laypage .layui-laypage-curr .layui-laypage-em{ background-color: var(--ui-primary) !important; }
+
+.layui-layer{ border-radius: 16px; overflow: hidden; box-shadow: var(--ui-shadow); }
+.layui-layer-title{ background: linear-gradient(90deg, rgba(47, 128, 255, 0.12), rgba(47, 128, 255, 0.04)); border-bottom: 1px solid var(--ui-border); color: var(--ui-text); }
+.layui-layer-btn a{ border-radius: 10px; }
 .icons li,.icons li:hover,.loginBody .seraph,.loginBody .seraph:hover,.loginBody .layui-form-item.layui-input-focus label,.loginBody .layui-form-item label,.loginBody .layui-form-item.layui-input-focus input,.loginBody .layui-form-item input{transition: all 0.3s ease-in-out;-webkit-transition: all 0.3s ease-in-out;}
 .icons li:hover i,.icons li i{transition: font-size 0.3s ease-in-out;-webkit-transition: font-size 0.3s ease-in-out;}
 .loginBody .layui-input-focus .layui-input::-webkit-input-placeholder{transition: color 0.2s linear 0.2s;-webkit-transition: color 0.2s linear 0.2s;}
@@ -173,6 +246,7 @@ h2.method{ font-size:18px; line-height:45px; padding-left:5px;}
 .linksAdd .layui-input-block input{ padding:0 5px;}
 /*响应式*/
 @media screen and (max-width:450px) {
+    .childrenBody{ padding:12px; }
     #userFaceBtn{ height: 30px;line-height: 30px; padding: 0 10px; font-size: 12px;}
     .user_right img#userFace{ width:100px; height:100px; margin-top:0;}
     .layui-col-xs12 .layui-form-label{ width:60px; padding-left:0;}

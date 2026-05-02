@@ -7,6 +7,10 @@
     --ui-border: #e6eefc;
     --ui-text: #13223a;
     --ui-muted: #6b7b94;
+    --ui-success: #16a34a;
+    --ui-warning: #d97706;
+    --ui-danger: #dc2626;
+    --ui-focus: 0 0 0 3px rgba(47, 128, 255, 0.18);
     --ui-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
 }
 .header .layui-nav-child {
@@ -14,6 +18,11 @@
     top: 60px;
     left: auto;
     right: 0;
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 14px;
+    box-shadow: var(--ui-shadow);
+    padding: 8px 0;
 }
 
 .seraph {
@@ -28,7 +37,7 @@
     cursor: pointer;
 }
 
-.layui-nav .layui-nav-item > a {
+.header .layui-nav .layui-nav-item > a {
     color: rgba(255, 255, 255, 1);
     max-height: 60px;
 }
@@ -45,13 +54,23 @@ iframe {
 }
 
 .top_menu.layui-nav .layui-nav-child dd.layui-this a, .closeBox.layui-nav .layui-nav-child dd.layui-this a, .closeBox .layui-nav-child dd.layui-this, .top_menu .layui-nav-child dd.layui-this {
-    background: none;
-    color: #333;
+    background: rgba(47, 128, 255, 0.10);
+    color: var(--ui-primary);
 }
 
 .layui-nav .layui-nav-child a:hover, .layui-nav .layui-nav-child dd.layui-this a:hover {
-    background-color: #5FB878;
-    color: #fff;
+    background-color: rgba(47, 128, 255, 0.12);
+    color: var(--ui-primary);
+}
+
+.header .layui-nav .layui-nav-child a {
+    color: var(--ui-text);
+    border-radius: 10px;
+    margin: 0 8px;
+}
+
+.header .layui-nav .layui-nav-child dd {
+    padding: 2px 0;
 }
 
 /*模拟加载层图标样式*/
@@ -459,15 +478,16 @@ iframe {
     position: absolute;
     right: 8px;
     top: 8px;
-    color: #000;
+    color: var(--ui-muted);
 }
 
 .component dl dd {
-    color: #000 !important;
+    color: var(--ui-text) !important;
 }
 
 .component dl dd.layui-this {
-    color: #fff !important;
+    color: var(--ui-primary) !important;
+    background: rgba(47, 128, 255, 0.12) !important;
 }
 
 .component dl dd.layui-select-tips {
@@ -527,7 +547,7 @@ iframe {
 #top_tabs_box {
     padding-right: 138px;
     height: 40px;
-    border-bottom: 1px solid #e2e2e2;
+    border-bottom: 1px solid var(--ui-border);
 }
 
 #top_tabs {
@@ -536,8 +556,8 @@ iframe {
 }
 
 .layui-tab-title .layui-this {
-    background-color: #393D49;
-    color: #fff;
+    background: linear-gradient(90deg, rgba(47, 128, 255, 0.12), rgba(47, 128, 255, 0.04));
+    color: var(--ui-primary);
 }
 
 .layui-tab-title .layui-this:after {
@@ -561,10 +581,10 @@ iframe {
 .closeBox {
     position: absolute;
     right: 0;
-    background-color: #fff !important;
-    color: #000;
-    border-left: 1px solid #e2e2e2;
-    border-bottom: 1px solid #e2e2e2;
+    background-color: var(--ui-card) !important;
+    color: var(--ui-text);
+    border-left: 1px solid var(--ui-border);
+    border-bottom: 1px solid var(--ui-border);
 }
 
 .closeBox .layui-nav-item {
@@ -572,12 +592,16 @@ iframe {
 }
 
 .closeBox .layui-nav-item > a, .closeBox .layui-nav-item > a:hover {
-    color: #000;
+    color: var(--ui-text);
 }
 
 .closeBox .layui-nav-child {
     top: 42px;
     left: -12px;
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 14px;
+    box-shadow: var(--ui-shadow);
 }
 
 .closeBox .layui-nav-bar {
@@ -592,11 +616,11 @@ iframe {
 }
 
 .closeBox a span.layui-nav-more {
-    border-color: #333 transparent transparent;
+    border-color: #9fb4d2 transparent transparent;
 }
 
 .closeBox a span.layui-nav-more.layui-nav-mored {
-    border-color: transparent transparent #333;
+    border-color: transparent transparent #9fb4d2;
 }
 
 /*功能设定*/
@@ -655,6 +679,29 @@ iframe {
 
 .orange .layui-nav-tree .layui-nav-child a, .blue .layui-nav-tree .layui-nav-child a {
     color: #fff;
+}
+
+.main_body.orange .layui-bg-black,
+.main_body.blue .layui-bg-black,
+.main_body.orange .hideMenu,
+.main_body.blue .hideMenu {
+    background: var(--ui-card) !important;
+}
+
+.main_body.orange .hideMenu,
+.main_body.blue .hideMenu {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.main_body.orange .layui-layout-admin .layui-header,
+.main_body.blue .layui-layout-admin .layui-header {
+    background: linear-gradient(90deg, var(--ui-primary) 0%, var(--ui-primary-2) 100%) !important;
+}
+
+.main_body.orange .layui-nav-tree .layui-nav-child a,
+.main_body.blue .layui-nav-tree .layui-nav-child a {
+    color: var(--ui-text) !important;
 }
 
 .orange .top_menu.layui-nav .layui-nav-more, .blue .top_menu.layui-nav .layui-nav-more {
