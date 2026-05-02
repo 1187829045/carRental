@@ -5,12 +5,13 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"carRental/internal/monitor"
+
 	mysql "github.com/go-sql-driver/mysql"
 )
 
 func OpenMySQL(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open(monitor.DriverName, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func OpenMySQLAutoCreateDB(dsn string) (*sql.DB, error) {
 		return nil, err
 	}
 	cfg.DBName = ""
-	admin, adminErr := sql.Open("mysql", cfg.FormatDSN())
+	admin, adminErr := sql.Open(monitor.DriverName, cfg.FormatDSN())
 	if adminErr != nil {
 		return nil, err
 	}

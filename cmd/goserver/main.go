@@ -9,6 +9,7 @@ import (
 	"carRental/internal/config"
 	"carRental/internal/db"
 	"carRental/internal/handler"
+	"carRental/internal/monitor"
 	"carRental/internal/service"
 )
 
@@ -27,6 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config: %v", err)
 	}
+	monitorCollector := monitor.NewCollector(monitor.MetaFromDSN(cfg.MySQLDSN))
+	monitor.SetDefault(monitorCollector)
 
 	mysqlDB, err := db.OpenMySQLAutoCreateDB(cfg.MySQLDSN)
 	if err != nil {
@@ -50,7 +53,8 @@ func main() {
 	}
 
 	r := handler.NewRouter(handler.Deps{
-		Cfg: cfg,
+		Cfg:     cfg,
+		Monitor: monitorCollector,
 		AuthService: &service.AuthService{
 			DB: mysqlDB,
 		},

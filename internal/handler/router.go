@@ -9,11 +9,13 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
 	"carRental/internal/config"
 	"carRental/internal/model"
+	"carRental/internal/monitor"
 	"carRental/internal/service"
 	"carRental/internal/view"
 
@@ -28,6 +30,7 @@ import (
 
 type Deps struct {
 	Cfg           config.Config
+	Monitor       *monitor.Collector
 	AuthService   *service.AuthService
 	MenuService   *service.MenuService
 	SystemService *service.SystemService
@@ -51,6 +54,9 @@ func NewRouter(d Deps) *gin.Engine {
 		SameSite: http.SameSiteLaxMode,
 	})
 	r.Use(sessions.Sessions("carRental.sid", store))
+	if d.Monitor != nil {
+		r.Use(monitorWebMiddleware(basePath, d.Monitor))
+	}
 
 	// Static assets: JSP uses `${yeqifu}/static/...`
 	r.Static("/static", d.Cfg.StaticDir)
@@ -87,37 +93,101 @@ func NewRouter(d Deps) *gin.Engine {
 		c.Redirect(http.StatusFound, withBase(basePath, "/druid/toLogin.action"))
 	})
 
-	// Lightweight replacement for the original druid monitor entry.
 	druid.GET("/", func(c *gin.Context) {
-		sess := sessions.Default(c)
-		authed, _ := sess.Get("druid_authed").(bool)
-		if !authed {
+		if !isDruidAuthed(c) {
 			c.Redirect(http.StatusFound, withBase(basePath, "/druid/toLogin.action"))
 			return
 		}
-		if d.SystemService == nil {
-			c.String(http.StatusOK, "druid replacement unavailable")
-			return
-		}
-		stats, err := d.SystemService.DBStats(c.Request.Context())
-		if err != nil {
-			c.String(http.StatusInternalServerError, "load db stats error")
-			return
-		}
-		html := "<html><head><meta charset=\"utf-8\"><title>DB Monitor</title></head><body>" +
-			"<h2>Go DB Monitor</h2>" +
-			"<table border=\"1\" cellpadding=\"8\">" +
-			"<tr><th>OpenConnections</th><td>" + stats["open_connections"] + "</td></tr>" +
-			"<tr><th>InUse</th><td>" + stats["in_use"] + "</td></tr>" +
-			"<tr><th>Idle</th><td>" + stats["idle"] + "</td></tr>" +
-			"<tr><th>WaitCount</th><td>" + stats["wait_count"] + "</td></tr>" +
-			"<tr><th>WaitDuration</th><td>" + stats["wait_duration"] + "</td></tr>" +
-			"<tr><th>MaxOpenConnections</th><td>" + stats["max_open_connections"] + "</td></tr>" +
-			"</table></body></html>"
-		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+		renderView(c, d.Cfg, "system/druid/druidDashboard", map[string]any{
+			"refresh": "5",
+		})
 	})
 	druid.GET("/index.html", func(c *gin.Context) {
 		c.Redirect(http.StatusFound, withBase(basePath, "/druid/"))
+	})
+	druid.GET("/datasource.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		if d.SystemService == nil || d.Monitor == nil || d.SystemService.DB == nil {
+			c.JSON(http.StatusOK, gin.H{"code": 1, "msg": "监控未初始化"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "",
+			"data": d.Monitor.DataSourceSnapshot(d.SystemService.DB),
+		})
+	})
+	druid.GET("/sql.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		page := parsePositiveInt(c.DefaultQuery("page", "1"), 1)
+		pageSize := parsePositiveInt(c.DefaultQuery("pageSize", "20"), 20)
+		sortBy := strings.TrimSpace(c.DefaultQuery("sortBy", "totalTimeMs"))
+		query := strings.TrimSpace(c.Query("q"))
+		c.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "",
+			"data": d.Monitor.SQLList(page, pageSize, query, sortBy),
+		})
+	})
+	druid.GET("/sql-:id.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		detail, ok := d.Monitor.SQLDetail(c.Param("id"))
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{"code": 1, "msg": "SQL不存在"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "", "data": detail})
+	})
+	druid.GET("/weburi.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		page := parsePositiveInt(c.DefaultQuery("page", "1"), 1)
+		pageSize := parsePositiveInt(c.DefaultQuery("pageSize", "20"), 20)
+		query := strings.TrimSpace(c.Query("q"))
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "", "data": d.Monitor.WebURIList(page, pageSize, query)})
+	})
+	druid.GET("/websession.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		page := parsePositiveInt(c.DefaultQuery("page", "1"), 1)
+		pageSize := parsePositiveInt(c.DefaultQuery("pageSize", "20"), 20)
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "", "data": d.Monitor.WebSessionList(page, pageSize)})
+	})
+	druid.POST("/reset-all.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		d.Monitor.ResetAll()
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "已重置全部监控数据"})
+	})
+	druid.POST("/reset-sql.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		d.Monitor.ResetSQL()
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "已重置SQL监控数据"})
+	})
+	druid.POST("/reset-web.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		d.Monitor.ResetWeb()
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "已重置Web监控数据"})
+	})
+	druid.POST("/reset-datasource.json", func(c *gin.Context) {
+		if !requireDruidAuthJSON(c) {
+			return
+		}
+		d.Monitor.ResetDataSource()
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "已重置数据源监控数据"})
 	})
 
 	// Root: behave like original index.jsp forward, and use it as logout target.
@@ -276,11 +346,73 @@ func requireLogin(basePath string) gin.HandlerFunc {
 	}
 }
 
+func monitorWebMiddleware(basePath string, collector *monitor.Collector) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		p := c.Request.URL.Path
+		base := normalizeBasePath(basePath)
+		if base != "" && strings.HasPrefix(p, base) {
+			p = strings.TrimPrefix(p, base)
+			if p == "" {
+				p = "/"
+			}
+		}
+		if strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/druid/") {
+			c.Next()
+			return
+		}
+		reqURI := p
+		info := &monitor.RequestInfo{URI: reqURI}
+		c.Request = c.Request.WithContext(monitor.WithRequestInfo(c.Request.Context(), info))
+		collector.RecordRequestStart(reqURI)
+		start := time.Now()
+		c.Next()
+
+		finalURI := c.FullPath()
+		if finalURI == "" {
+			finalURI = p
+		}
+		if base != "" && strings.HasPrefix(finalURI, base) {
+			finalURI = strings.TrimPrefix(finalURI, base)
+		}
+		collector.RecordRequestFinish(finalURI, c.Writer.Status(), time.Since(start), info)
+		if sid, err := c.Cookie("carRental.sid"); err == nil && sid != "" {
+			userName := ""
+			if u, ok := getSessionUser(c); ok {
+				userName = u.LoginName
+			}
+			collector.RecordSession(monitor.HashSessionKey(sid), userName, c.ClientIP())
+		}
+	}
+}
+
+func isDruidAuthed(c *gin.Context) bool {
+	sess := sessions.Default(c)
+	authed, _ := sess.Get("druid_authed").(bool)
+	return authed
+}
+
+func requireDruidAuthJSON(c *gin.Context) bool {
+	if isDruidAuthed(c) {
+		return true
+	}
+	c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "请先登录监控系统"})
+	c.Abort()
+	return false
+}
+
 func getSessionUser(c *gin.Context) (model.User, bool) {
 	sess := sessions.Default(c)
 	v := sess.Get("user")
 	u, ok := v.(model.User)
 	return u, ok
+}
+
+func parsePositiveInt(raw string, def int) int {
+	n, err := strconv.Atoi(strings.TrimSpace(raw))
+	if err != nil || n <= 0 {
+		return def
+	}
+	return n
 }
 
 func pageWithUser(cfg config.Config, viewPath string) gin.HandlerFunc {
