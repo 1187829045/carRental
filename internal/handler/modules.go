@@ -581,10 +581,10 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 	rg.POST("/rent/checkCustomerExist.action", func(c *gin.Context) {
 		x, err := d.BusService.GetCustomer(c.Request.Context(), c.PostForm("identity"))
 		if err != nil || x == nil {
-			c.JSON(http.StatusOK, StatusFalse)
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "客户不存在"})
 			return
 		}
-		c.JSON(http.StatusOK, StatusTrue)
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "存在"})
 	})
 	rg.GET("/rent/initRentFrom.action", func(c *gin.Context) {
 		x, err := d.BusService.NewRentForm(c.Request.Context(), c.Query("identity"))
@@ -678,14 +678,6 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			return
 		}
 		c.JSON(http.StatusOK, CheckSuccess)
-	})
-	rg.POST("/rent/checkCustomerExist.action", func(c *gin.Context) {
-		customer, err := d.BusService.GetCustomer(c.Request.Context(), c.PostForm("identity"))
-		if err != nil || customer == nil {
-			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "客户不存在"})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "存在"})
 	})
 	rg.GET("/rent/loadAllRent.action", func(c *gin.Context) {
 		q := flatQuery(c)
