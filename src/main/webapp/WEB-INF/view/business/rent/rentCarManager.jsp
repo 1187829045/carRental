@@ -151,6 +151,14 @@
             type:'datetime'
         });
 
+        function normalizeIdentity(value) {
+            return $.trim(value || "").replace(/[^0-9xX]/g, "").toUpperCase();
+        }
+
+        function isValidIdentity(value) {
+            return /^(?:\d{15}|\d{17}[\dX])$/.test(value);
+        }
+
         function initCarData() {
             //渲染数据表格
             tableIns = table.render({
@@ -186,6 +194,18 @@
 
         //模糊查询
         $("#doSearch").click(function () {
+            var identity = normalizeIdentity($("#identity").val());
+            $("#identity").val(identity);
+            if (!identity) {
+                layer.msg("请输入身份证号");
+                $("#content").hide();
+                return;
+            }
+            if (!isValidIdentity(identity)) {
+                layer.msg("请输入正确的身份证号");
+                $("#content").hide();
+                return;
+            }
             var params = $("#searchFrm").serialize();
             $.post("${yeqifu}/rent/checkCustomerExist.action", params, function (obj) {
                 if (obj.code >= 0) { //此客户存在，code的返回值为0
@@ -225,7 +245,8 @@
                     $("#dataFrm")[0].reset();
                     //请求数据,分别拿到出租价格，身份证号，车牌号
                     var price=data.rentprice;
-                    var identity=$("#identity").val();
+                    var identity=normalizeIdentity($("#identity").val());
+                    $("#identity").val(identity);
                     var carnumber=data.carnumber;
                     $.get("${yeqifu}/rent/initRentFrom.action",{
                         identity:identity,
@@ -269,4 +290,3 @@
 </script>
 </body>
 </html>
-

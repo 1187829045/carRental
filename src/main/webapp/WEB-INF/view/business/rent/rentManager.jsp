@@ -284,6 +284,10 @@
             type:'datetime'
         });
 
+        function normalizeIdentity(value) {
+            return $.trim(value || "").replace(/[^0-9xX]/g, "").toUpperCase();
+        }
+
         //渲染数据表格
         tableIns = table.render({
             elem: '#rentTable'   //渲染的目标对象
@@ -323,6 +327,8 @@
 
         //模糊查询
         $("#doSearch").click(function () {
+            var identityInput = $("#searchFrm").find("input[name='identity']");
+            identityInput.val(normalizeIdentity(identityInput.val()));
             var params = $("#searchFrm").serialize();
             tableIns.reload({
                 url: "${yeqifu}/rent/loadAllRent.action?" + params,
@@ -417,4 +423,3 @@
 </script>
 </body>
 </html>
-

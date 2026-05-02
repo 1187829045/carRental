@@ -531,8 +531,9 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, NewPage(count, data))
 	})
 	rg.POST("/customer/addCustomer.action", func(c *gin.Context) {
+		identity := service.NormalizeIdentity(c.PostForm("identity"))
 		err := d.BusService.AddCustomer(c.Request.Context(), model.Customer{
-			Identity:   c.PostForm("identity"),
+			Identity:   identity,
 			CustName:   c.PostForm("custname"),
 			Sex:        intParam(c, "sex"),
 			Address:    c.PostForm("address"),
@@ -547,8 +548,9 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, AddSuccess)
 	})
 	rg.POST("/customer/updateCustomer.action", func(c *gin.Context) {
+		identity := service.NormalizeIdentity(c.PostForm("identity"))
 		err := d.BusService.UpdateCustomer(c.Request.Context(), model.Customer{
-			Identity: c.PostForm("identity"),
+			Identity: identity,
 			CustName: c.PostForm("custname"),
 			Sex:      intParam(c, "sex"),
 			Address:  c.PostForm("address"),
@@ -562,7 +564,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, UpdateSuccess)
 	})
 	rg.POST("/customer/deleteCustomer.action", func(c *gin.Context) {
-		if err := d.BusService.DeleteCustomer(c.Request.Context(), c.PostForm("identity")); err != nil {
+		if err := d.BusService.DeleteCustomer(c.Request.Context(), service.NormalizeIdentity(c.PostForm("identity"))); err != nil {
 			c.JSON(http.StatusOK, DeleteError)
 			return
 		}
@@ -579,7 +581,12 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 	})
 
 	rg.POST("/rent/checkCustomerExist.action", func(c *gin.Context) {
-		x, err := d.BusService.GetCustomer(c.Request.Context(), c.PostForm("identity"))
+		identity := service.NormalizeIdentity(c.PostForm("identity"))
+		if identity == "" {
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "身份证号不能为空"})
+			return
+		}
+		x, err := d.BusService.GetCustomer(c.Request.Context(), identity)
 		if err != nil || x == nil {
 			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "客户不存在"})
 			return
@@ -599,7 +606,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, NewPage(count, data))
 	})
 	rg.GET("/rent/initRentFrom.action", func(c *gin.Context) {
-		x, err := d.BusService.NewRentForm(c.Request.Context(), c.Query("identity"))
+		x, err := d.BusService.NewRentForm(c.Request.Context(), service.NormalizeIdentity(c.Query("identity")))
 		if err != nil || x == nil {
 			c.JSON(http.StatusOK, gin.H{})
 			return
@@ -615,13 +622,14 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		if u, ok := getSessionUser(c); ok && u.Type != 1 {
 			operid = u.UserID
 		}
+		identity := service.NormalizeIdentity(c.PostForm("identity"))
 		rt := model.Rent{
 			RentID:     c.PostForm("rentid"),
 			Price:      floatParam(c, "price"),
 			BeginDate:  timeParamValue(c, "begindate", time.Now()),
 			ReturnDate: timePtrParam(c, "returndate"),
 			RentFlag:   2,
-			Identity:   c.PostForm("identity"),
+			Identity:   identity,
 			CarNumber:  c.PostForm("carnumber"),
 			OperId:     operid,
 			CreateTime: time.Now(),
@@ -660,13 +668,14 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 				return
 			}
 		}
+		identity := service.NormalizeIdentity(c.PostForm("identity"))
 		rt := model.Rent{
 			RentID:     rentid,
 			Price:      floatParam(c, "price"),
 			BeginDate:  timeParamValue(c, "begindate", time.Now()),
 			ReturnDate: timePtrParam(c, "returndate"),
 			RentFlag:   intParam(c, "rentflag"),
-			Identity:   c.PostForm("identity"),
+			Identity:   identity,
 			CarNumber:  c.PostForm("carnumber"),
 			OperId:     rent.OperId, // Preserve OperId
 		}

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	"carRental/internal/model"
 )
@@ -20,6 +21,24 @@ const (
 type BusService struct {
 	DB          *sql.DB
 	FileService *FileService
+}
+
+func NormalizeIdentity(identity string) string {
+	var b strings.Builder
+	b.Grow(len(identity))
+	for _, r := range strings.TrimSpace(identity) {
+		switch {
+		case unicode.IsDigit(r):
+			b.WriteRune(r)
+		case unicode.IsLetter(r):
+			b.WriteRune(unicode.ToUpper(r))
+		}
+	}
+	return b.String()
+}
+
+func normalizedIdentityExpr(column string) string {
+	return fmt.Sprintf("REGEXP_REPLACE(UPPER(COALESCE(%s, '')), '[^0-9A-Z]', '')", column)
 }
 
 func (s *BusService) QueryCars(ctx context.Context, q map[string]string) (int64, []model.Car, error) {
@@ -190,8 +209,11 @@ func (s *BusService) QueryCustomers(ctx context.Context, q map[string]string) (i
 	}
 	where := []string{"1=1"}
 	args := []any{}
+	if v := NormalizeIdentity(q["identity"]); v != "" {
+		where = append(where, normalizedIdentityExpr("identity")+" LIKE ?")
+		args = append(args, likeArg(v))
+	}
 	for _, item := range []struct{ key, col string }{
-		{"identity", "identity"},
 		{"custname", "custname"},
 		{"phone", "phone"},
 		{"career", "career"},
@@ -242,7 +264,11 @@ func (s *BusService) ListCustomers(ctx context.Context, q map[string]string) ([]
 }
 
 func (s *BusService) GetCustomer(ctx context.Context, identity string) (*model.Customer, error) {
-	row := s.DB.QueryRowContext(ctx, `SELECT identity,custname,sex,address,phone,career,createtime FROM bus_customer WHERE identity=?`, identity)
+	identity = NormalizeIdentity(identity)
+	if identity == "" {
+		return nil, nil
+	}
+	row := s.DB.QueryRowContext(ctx, `SELECT identity,custname,sex,address,phone,career,createtime FROM bus_customer WHERE `+normalizedIdentityExpr("identity")+`=? LIMIT 1`, identity)
 	var x model.Customer
 	if err := row.Scan(&x.Identity, &x.CustName, &x.Sex, &x.Address, &x.Phone, &x.Career, &x.CreateTime); err != nil {
 		if err == sql.ErrNoRows {
@@ -254,6 +280,10 @@ func (s *BusService) GetCustomer(ctx context.Context, identity string) (*model.C
 }
 
 func (s *BusService) AddCustomer(ctx context.Context, x model.Customer) error {
+	x.Identity = NormalizeIdentity(x.Identity)
+	if x.Identity == "" {
+		return fmt.Errorf("identity is required")
+	}
 	if x.CreateTime.IsZero() {
 		x.CreateTime = time.Now()
 	}
@@ -262,11 +292,19 @@ func (s *BusService) AddCustomer(ctx context.Context, x model.Customer) error {
 	return err
 }
 func (s *BusService) UpdateCustomer(ctx context.Context, x model.Customer) error {
+	x.Identity = NormalizeIdentity(x.Identity)
+	if x.Identity == "" {
+		return fmt.Errorf("identity is required")
+	}
 	_, err := s.DB.ExecContext(ctx, `UPDATE bus_customer SET custname=?,sex=?,address=?,phone=?,career=? WHERE identity=?`,
 		x.CustName, x.Sex, x.Address, x.Phone, x.Career, x.Identity)
 	return err
 }
 func (s *BusService) DeleteCustomer(ctx context.Context, identity string) error {
+	identity = NormalizeIdentity(identity)
+	if identity == "" {
+		return fmt.Errorf("identity is required")
+	}
 	_, err := s.DB.ExecContext(ctx, `DELETE FROM bus_customer WHERE identity=?`, identity)
 	return err
 }
@@ -281,12 +319,15 @@ func (s *BusService) QueryRents(ctx context.Context, q map[string]string) (int64
 	for _, item := range []struct{ key, col string }{
 		{"rentid", "rentid"},
 		{"carnumber", "carnumber"},
-		{"identity", "identity"},
 	} {
 		if v := strings.TrimSpace(q[item.key]); v != "" {
 			where = append(where, item.col+" LIKE ?")
 			args = append(args, likeArg(v))
 		}
+	}
+	if v := NormalizeIdentity(q["identity"]); v != "" {
+		where = append(where, normalizedIdentityExpr("br.identity")+" LIKE ?")
+		args = append(args, likeArg(v))
 	}
 	if t, err := parseDateTime(q["startTime"]); err == nil && t != nil {
 		where = append(where, "createtime >= ?")
@@ -350,6 +391,7 @@ func (s *BusService) GetRent(ctx context.Context, rentid string) (*model.Rent, e
 }
 
 func (s *BusService) NewRentForm(ctx context.Context, identity string) (*model.Rent, error) {
+	identity = NormalizeIdentity(identity)
 	customer, err := s.GetCustomer(ctx, identity)
 	if err != nil {
 		return nil, err
@@ -376,6 +418,10 @@ func (s *BusService) SaveRent(ctx context.Context, x model.Rent) error {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	x.Identity = NormalizeIdentity(x.Identity)
+	if x.Identity == "" {
+		return fmt.Errorf("identity is required")
+	}
 	if x.CreateTime.IsZero() {
 		x.CreateTime = time.Now()
 	}
@@ -390,6 +436,10 @@ func (s *BusService) SaveRent(ctx context.Context, x model.Rent) error {
 }
 
 func (s *BusService) UpdateRent(ctx context.Context, x model.Rent) error {
+	x.Identity = NormalizeIdentity(x.Identity)
+	if x.Identity == "" {
+		return fmt.Errorf("identity is required")
+	}
 	_, err := s.DB.ExecContext(ctx, `UPDATE bus_rent SET price=?,begindate=?,returndate=?,rentflag=?,identity=?,carnumber=?,operid=? WHERE rentid=?`,
 		x.Price, x.BeginDate, x.ReturnDate, x.RentFlag, x.Identity, x.CarNumber, x.OperId, x.RentID)
 	return err
