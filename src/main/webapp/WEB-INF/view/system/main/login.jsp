@@ -23,6 +23,7 @@
 </head>
 <body class="loginBody">
 <form class="layui-form" id="loginFrm" method="post" action="${yeqifu}/login/login.action">
+    <div class="login-brand-title">汽车租赁系统</div>
     <div class="login_face"><img src="${yeqifu}/static/images/face.jpg" class="userAvatar"></div>
     <div class="layui-form-item input-item">
         <label for="loginname">用户名</label>

@@ -513,14 +513,23 @@ func drawCaptcha(code string, w, h int) image.Image {
 		drawLine(small, x1, y1, x2, y2, col)
 	}
 
+	textW := len(code)*7 + (len(code)-1)*2
+	startX := (baseW - textW) / 2
+	if startX < 8 {
+		startX = 8
+	}
+	if startX > baseW-8-textW {
+		startX = baseW - 8 - textW
+	}
+
 	d := &font.Drawer{
 		Dst:  small,
 		Src:  image.NewUniform(color.Black),
 		Face: basicfont.Face7x13,
-		Dot:  fixed.P(10, 24),
+		Dot:  fixed.P(startX, 24),
 	}
 	d.DrawString(code)
-	d.Dot = fixed.P(11, 24)
+	d.Dot = fixed.P(startX+1, 24)
 	d.DrawString(code)
 
 	out := image.NewRGBA(image.Rect(0, 0, w, h))
