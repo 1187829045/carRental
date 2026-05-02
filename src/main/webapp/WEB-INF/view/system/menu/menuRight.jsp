@@ -219,7 +219,7 @@
         })
 
         $(document).ajaxError(function () {
-            layer.msg("接口请求失败，请检查后端服务与路由配置");
+            layer.msg("菜单数据加载失败，请稍后重试");
         });
 
         //模糊查询

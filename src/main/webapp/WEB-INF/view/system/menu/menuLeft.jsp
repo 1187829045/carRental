@@ -39,7 +39,8 @@
             var dtree = layui.dtree;
 
 			$(document).ajaxError(function () {
-				layer.msg("接口请求失败，请检查后端服务与路由配置");
+				layer.msg("菜单树加载失败，请稍后重试");
+				$("#menuTree").html("<div style='padding:14px;color:#e74c3c'>菜单树加载失败，请检查后端服务或刷新重试</div>");
 			});
 
             // 初始化树

@@ -16,6 +16,10 @@ func TestRouterHasMenuRoutesUnderBasePath(t *testing.T) {
 		"/carRental/sys/toMenuManager.action",
 		"/carRental/sys/toMenuLeft.action",
 		"/carRental/sys/toMenuRight.action",
+		"/carRental/druid/toLogin.action",
+		"/carRental/druid/login.action",
+		"/carRental/druid/logout.action",
+		"/carRental/druid/",
 		"/carRental/menu/loadMenuManagerLeftTreeJson.action",
 		"/carRental/menu/loadAllMenu.action",
 		"/carRental/menu/addMenu.action",
@@ -30,4 +34,3 @@ func TestRouterHasMenuRoutesUnderBasePath(t *testing.T) {
 		}
 	}
 }
-

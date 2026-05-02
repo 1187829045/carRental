@@ -59,12 +59,41 @@ func NewRouter(d Deps) *gin.Engine {
 
 	root := r.Group(basePath)
 
-	// Lightweight replacement for the original druid monitor entry.
 	druid := root.Group("/druid")
-	if d.Cfg.MonitorUser != "" {
-		druid.Use(gin.BasicAuth(gin.Accounts{d.Cfg.MonitorUser: d.Cfg.MonitorPass}))
-	}
+	druid.GET("/toLogin.action", func(c *gin.Context) {
+		renderView(c, d.Cfg, "system/druid/druidLogin", map[string]any{"error": ""})
+	})
+	druid.POST("/login.action", func(c *gin.Context) {
+		username := strings.TrimSpace(c.PostForm("username"))
+		password := strings.TrimSpace(c.PostForm("password"))
+		if username == "" || password == "" {
+			renderView(c, d.Cfg, "system/druid/druidLogin", map[string]any{"error": "请输入账号和密码"})
+			return
+		}
+		if username != d.Cfg.MonitorUser || password != d.Cfg.MonitorPass {
+			renderView(c, d.Cfg, "system/druid/druidLogin", map[string]any{"error": "账号或密码错误"})
+			return
+		}
+		sess := sessions.Default(c)
+		sess.Set("druid_authed", true)
+		_ = sess.Save()
+		c.Redirect(http.StatusFound, withBase(basePath, "/druid/"))
+	})
+	druid.POST("/logout.action", func(c *gin.Context) {
+		sess := sessions.Default(c)
+		sess.Delete("druid_authed")
+		_ = sess.Save()
+		c.Redirect(http.StatusFound, withBase(basePath, "/druid/toLogin.action"))
+	})
+
+	// Lightweight replacement for the original druid monitor entry.
 	druid.GET("/", func(c *gin.Context) {
+		sess := sessions.Default(c)
+		authed, _ := sess.Get("druid_authed").(bool)
+		if !authed {
+			c.Redirect(http.StatusFound, withBase(basePath, "/druid/toLogin.action"))
+			return
+		}
 		if d.SystemService == nil {
 			c.String(http.StatusOK, "druid replacement unavailable")
 			return

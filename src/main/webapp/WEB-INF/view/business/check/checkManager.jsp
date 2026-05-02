@@ -202,7 +202,6 @@
             , url: '${yeqifu}/check/loadAllCheck.action' //数据接口
             , title: '检查单数据表'//数据导出来的标题
             , toolbar: "#checkToolBar"   //表格的工具条
-            , height: 'full-260'
             , cellMinWidth: 100 //设置列的最小默认宽度
             , page: true  //是否启用分页
             , cols: [[   //列表数据
@@ -218,6 +217,15 @@
                 , {fixed: 'right', title: '操作', toolbar: '#checkBar', align: 'center', width: '130'}
             ]]
         });
+
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
+        setTimeout(function () {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }, 0);
 
         //模糊查询
         $("#doSearch").click(function () {
@@ -307,4 +315,3 @@
 </script>
 </body>
 </html>
-
