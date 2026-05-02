@@ -63,21 +63,8 @@
                 </div>
             </div>
 
-            <div class="layui-form-item login-actions">
-                <label class="login-remember"><input type="checkbox" id="rememberMe" lay-skin="primary" title="" />记住我</label>
-                <a class="login-forgot" href="javascript:;" id="forgotPwd">忘记密码？</a>
-            </div>
-
             <div class="layui-form-item">
                 <button class="layui-btn layui-block login-btn" id="loginBtn" lay-filter="login" lay-submit>登录</button>
-            </div>
-
-            <div class="login-third">
-                <div class="login-third__line"><span>其他方式</span></div>
-                <div class="login-third__icons">
-                    <a href="javascript:;" class="login-third__icon" data-provider="wechat">微信</a>
-                    <a href="javascript:;" class="login-third__icon" data-provider="qq">QQ</a>
-                </div>
             </div>
         </form>
     </div>
@@ -121,30 +108,10 @@
             }
         });
 
-        $('#forgotPwd').on('click', function(){
-            layer.msg('请联系管理员重置密码');
-        });
-
-        $('.login-third__icon').on('click', function(){
-            layer.msg('第三方登录暂未开放');
-        });
-
-        var saved = window.localStorage.getItem('remember_loginname');
-        if (saved) {
-            $('#loginname').val(saved);
-            $('#rememberMe').prop('checked', true);
-            form.render('checkbox');
-        }
-
         form.on('submit(login)', function(){
             var btn = $('#loginBtn');
             btn.text('登录中...').attr('disabled','disabled').addClass('layui-disabled');
             layer.load(2, {shade: [0.18,'#000']});
-            if ($('#rememberMe').is(':checked')) {
-                window.localStorage.setItem('remember_loginname', $('#loginname').val() || '');
-            } else {
-                window.localStorage.removeItem('remember_loginname');
-            }
             setTimeout(function(){
                 document.getElementById('loginFrm').submit();
             }, 200);
