@@ -61,10 +61,10 @@ public class RentController {
         //设置起租时间
         rentVo.setBegindate(new Date());
         //设置操作员
-        /*User user =(User) WebUtils.getHttpSession().getAttribute("user");
-        rentVo.setOpername(user.getRealname());*/
-        Customer customer = customerService.queryCustomerByIdentity(rentVo.getIdentity());
-        rentVo.setOpername(customer.getCustname());
+        User user =(User) WebUtils.getHttpSession().getAttribute("user");
+        rentVo.setOpername(user.getRealname());
+        //Customer customer = customerService.queryCustomerByIdentity(rentVo.getIdentity());
+        //rentVo.setOpername(customer.getCustname());
         return rentVo;
     }
 
@@ -151,6 +151,10 @@ public class RentController {
      */
     @RequestMapping("loadAllRent")
     public DataGridView loadAllRent(RentVo rentVo){
+        User user = (User) WebUtils.getHttpSession().getAttribute("user");
+        if(user.getType() != SysConstast.USER_TYPE_SUPER) {
+            rentVo.setOpername(user.getRealname());
+        }
         return this.rentService.queryAllRent(rentVo);
     }
 

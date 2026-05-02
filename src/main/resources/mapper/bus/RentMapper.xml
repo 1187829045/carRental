@@ -163,6 +163,9 @@
       <if test="rentflag!=null">
         and rentflag=#{rentflag}
       </if>
+      <if test="opername!=null and opername!=''">
+        and opername=#{opername}
+      </if>
     </where>
     order by createtime desc
   </select>

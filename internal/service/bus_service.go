@@ -216,8 +216,8 @@ func (s *BusService) QueryCustomers(ctx context.Context, q map[string]string) (i
 
 func (s *BusService) ListCustomers(ctx context.Context, q map[string]string) ([]model.Customer, error) {
 	_, data, err := s.QueryCustomers(ctx, map[string]string{
-		"page":    "1",
-		"limit":   "1000000",
+		"page":     "1",
+		"limit":    "1000000",
 		"identity": q["identity"],
 		"custname": q["custname"],
 		"phone":    q["phone"],
@@ -285,6 +285,10 @@ func (s *BusService) QueryRents(ctx context.Context, q map[string]string) (int64
 	}
 	if v := strings.TrimSpace(q["rentflag"]); v != "" {
 		where = append(where, "rentflag=?")
+		args = append(args, v)
+	}
+	if v := strings.TrimSpace(q["opername"]); v != "" {
+		where = append(where, "opername=?")
 		args = append(args, v)
 	}
 	wsql := strings.Join(where, " AND ")
@@ -426,6 +430,10 @@ func (s *BusService) QueryChecks(ctx context.Context, q map[string]string) (int6
 		where = append(where, "checkdate <= ?")
 		args = append(args, *t)
 	}
+	if v := strings.TrimSpace(q["opername"]); v != "" {
+		where = append(where, "opername=?")
+		args = append(args, v)
+	}
 	wsql := strings.Join(where, " AND ")
 	var count int64
 	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM bus_check WHERE "+wsql, args...).Scan(&count); err != nil {
@@ -557,4 +565,3 @@ func (s *BusService) DeleteFranchisee(ctx context.Context, id int) error {
 	_, err := s.DB.ExecContext(ctx, `DELETE FROM bus_franchisee WHERE id=?`, id)
 	return err
 }
-

@@ -149,6 +149,9 @@
       <if test="endTime!=null">
         and checkdate <![CDATA[<=]]>#{endTime}
       </if>
+      <if test="opername!=null and opername!=''">
+        and opername=#{opername}
+      </if>
     </where>
     order by createtime desc
   </select>

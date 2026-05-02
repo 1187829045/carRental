@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -156,7 +157,7 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">客户名称:</label>
+                <label class="layui-form-label">操作员:</label>
                 <div class="layui-input-inline">
                     <input type="text" name="opername" id="opername" lay-verify="required" placeholder="请输入操作员" readonly="readonly" class="layui-input">
                 </div>
@@ -301,7 +302,7 @@
                 }
                 , {field: 'begindate', title: '起租时间', align: 'center', width: '170'}
                 , {field: 'returndate', title: '还车时间', align: 'center', width: '170'}
-                , {field: 'opername', title: '客户名称', align: 'center', width: '120'}
+                , {field: 'opername', title: '操作员', align: 'center', width: '120'}
                 , {field: 'createtime', title: '录入时间', align: 'center', width: '180'}
                 , {fixed: 'right', title: '操作', toolbar: '#rentBar', align: 'center', width: '200'}
             ]],

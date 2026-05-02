@@ -552,6 +552,9 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			c.JSON(http.StatusOK, gin.H{})
 			return
 		}
+		if u, ok := getSessionUser(c); ok {
+			x.OperName = u.RealName
+		}
 		c.JSON(http.StatusOK, x)
 	})
 	rg.POST("/rent/saveRent.action", func(c *gin.Context) {
@@ -604,7 +607,11 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, CheckSuccess)
 	})
 	rg.GET("/rent/loadAllRent.action", func(c *gin.Context) {
-		count, data, err := d.BusService.QueryRents(c.Request.Context(), flatQuery(c))
+		q := flatQuery(c)
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			q["opername"] = u.RealName
+		}
+		count, data, err := d.BusService.QueryRents(c.Request.Context(), q)
 		if err != nil {
 			fail(c, "查询出租单失败")
 			return
@@ -626,6 +633,12 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			c.JSON(http.StatusOK, gin.H{})
 			return
 		}
+		if u, ok := getSessionUser(c); ok {
+			if check, ok := data["check"].(model.Check); ok {
+				check.OperName = u.RealName
+				data["check"] = check
+			}
+		}
 		c.JSON(http.StatusOK, data)
 	})
 	rg.POST("/check/saveCheck.action", func(c *gin.Context) {
@@ -646,7 +659,11 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, AddSuccess)
 	})
 	rg.GET("/check/loadAllCheck.action", func(c *gin.Context) {
-		count, data, err := d.BusService.QueryChecks(c.Request.Context(), flatQuery(c))
+		q := flatQuery(c)
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			q["opername"] = u.RealName
+		}
+		count, data, err := d.BusService.QueryChecks(c.Request.Context(), q)
 		if err != nil {
 			fail(c, "查询检查单失败")
 			return

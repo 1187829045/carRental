@@ -53,13 +53,9 @@ public class CheckServiceImpl implements ICheckService {
         check.setCheckid(RandomUtils.createRandomStringUseTime(SysConstast.CAR_ORDER_JC));
         check.setRentid(rentid);
         check.setCheckdate(new Date());
-//        User user =(User) WebUtils.getHttpSession().getAttribute("user");
-/*        System.out.println("======================================");
-        System.out.println(user.getRealname());*/
-
-//        check.setOpername(user.getRealname());
-
-        check.setOpername(rent.getOpername());
+        User user =(User) WebUtils.getHttpSession().getAttribute("user");
+        check.setOpername(user.getRealname());
+        // check.setOpername(rent.getOpername());
 
         Map<String, Object> map = new HashMap<>();
         map.put("rent",rent);

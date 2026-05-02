@@ -6,6 +6,9 @@ import com.yeqifu.bus.service.IRentService;
 import com.yeqifu.bus.vo.CheckVo;
 import com.yeqifu.sys.utils.DataGridView;
 import com.yeqifu.sys.utils.ResultObj;
+import com.yeqifu.sys.utils.WebUtils;
+import com.yeqifu.sys.constast.SysConstast;
+import com.yeqifu.sys.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,6 +75,10 @@ public class CheckController {
      */
     @RequestMapping("loadAllCheck")
     public DataGridView loadAllCheck(CheckVo checkVo){
+        User user = (User) WebUtils.getHttpSession().getAttribute("user");
+        if(user.getType() != SysConstast.USER_TYPE_SUPER) {
+            checkVo.setOpername(user.getRealname());
+        }
         return this.checkService.queryAllCheck(checkVo);
     }
 
