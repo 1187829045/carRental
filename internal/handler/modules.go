@@ -584,14 +584,14 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 	})
 	rg.POST("/rent/updateRent.action", func(c *gin.Context) {
 		rt := model.Rent{
-			RentID:    c.PostForm("rentid"),
-			Price:     floatParam(c, "price"),
-			BeginDate: timeParamValue(c, "begindate", time.Now()),
+			RentID:     c.PostForm("rentid"),
+			Price:      floatParam(c, "price"),
+			BeginDate:  timeParamValue(c, "begindate", time.Now()),
 			ReturnDate: timePtrParam(c, "returndate"),
-			RentFlag:  intParam(c, "rentflag"),
-			Identity:  c.PostForm("identity"),
-			CarNumber: c.PostForm("carnumber"),
-			OperName:  c.PostForm("opername"),
+			RentFlag:   intParam(c, "rentflag"),
+			Identity:   c.PostForm("identity"),
+			CarNumber:  c.PostForm("carnumber"),
+			OperName:   c.PostForm("opername"),
 		}
 		if err := d.BusService.UpdateRent(c.Request.Context(), rt); err != nil {
 			c.JSON(http.StatusOK, UpdateError)

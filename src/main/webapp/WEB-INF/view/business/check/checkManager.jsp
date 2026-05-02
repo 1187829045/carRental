@@ -97,10 +97,14 @@
     <button type="button" class="layui-btn layui-btn-danger layui-btn-sm layui-btn-radius" lay-event="deleteBatch">批量删除</button>
 </div>
 
-<div style="display: none;" id="checkBar">
-    <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
-</div>
+<script type="text/html" id="checkBar">
+    {{# if(d.opername == '${user.realname}' || '${user.type}' == '1') { }}
+        <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
+    {{# } else { }}
+        <span class="layui-badge layui-bg-gray">无操作权限</span>
+    {{# } }}
+</script>
 
 <!-- 添加和修改的弹出层-->
 <div style="display: none;padding: 20px" id="saveOrUpdateDiv">

@@ -96,17 +96,20 @@
 <div id="rentToolBar" style="display: none;"></div>
 
 <script type="text/html" id="rentBar">
-    {{#  if(d.rentflag == 1){ }}
-    <a class="layui-btn layui-btn-green layui-btn-xs layui-btn-radius" lay-event="exportRent">导出出租单</a>
-    {{#  } else if(d.rentflag == 2){ }}
-    <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
-    <a class="layui-btn layui-btn layui-btn-xs layui-btn-radius" lay-event="rentCheck">审核</a>
-    {{#  }else{ }}
-    <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
+    {{# if(d.opername == '${user.realname}' || '${user.type}' == '1') { }}
+        {{#  if(d.rentflag == 1){ }}
+        <a class="layui-btn layui-btn-green layui-btn-xs layui-btn-radius" lay-event="exportRent">导出出租单</a>
+        {{#  } else if(d.rentflag == 2){ }}
+        <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
+        <a class="layui-btn layui-btn layui-btn-xs layui-btn-radius" lay-event="rentCheck">审核</a>
+        {{#  }else{ }}
+        <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
+        {{# } }}
+    {{# } else { }}
+        <span class="layui-badge layui-bg-gray">无操作权限</span>
     {{# } }}
-
 </script>
 
 
