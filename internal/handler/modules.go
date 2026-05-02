@@ -586,6 +586,18 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		}
 		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "存在"})
 	})
+	rg.GET("/rent/loadAllRent.action", func(c *gin.Context) {
+		q := flatQuery(c)
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			q["operid"] = fmt.Sprint(u.UserID)
+		}
+		count, data, err := d.BusService.QueryRents(c.Request.Context(), q)
+		if err != nil {
+			fail(c, "查询出租单失败")
+			return
+		}
+		c.JSON(http.StatusOK, NewPage(count, data))
+	})
 	rg.GET("/rent/initRentFrom.action", func(c *gin.Context) {
 		x, err := d.BusService.NewRentForm(c.Request.Context(), c.Query("identity"))
 		if err != nil || x == nil {
@@ -692,8 +704,8 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, NewPage(count, data))
 	})
 
-	rg.GET("/check/checkRentExist.action", func(c *gin.Context) {
-		x, err := d.BusService.GetRent(c.Request.Context(), c.Query("rentid"))
+	rg.POST("/check/checkRentExist.action", func(c *gin.Context) {
+		x, err := d.BusService.GetRent(c.Request.Context(), c.PostForm("rentid"))
 		if err != nil || x == nil {
 			c.JSON(http.StatusOK, nil)
 			return
@@ -706,8 +718,8 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		}
 		c.JSON(http.StatusOK, x)
 	})
-	rg.GET("/check/initCheckFormData.action", func(c *gin.Context) {
-		data, err := d.BusService.InitCheckFormData(c.Request.Context(), c.Query("rentid"))
+	rg.POST("/check/initCheckFormData.action", func(c *gin.Context) {
+		data, err := d.BusService.InitCheckFormData(c.Request.Context(), c.PostForm("rentid"))
 		if err != nil || data == nil {
 			c.JSON(http.StatusOK, gin.H{})
 			return

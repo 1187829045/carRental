@@ -273,7 +273,13 @@ func NewRouter(d Deps) *gin.Engine {
 				strings.Contains(path, "/role/") || strings.Contains(path, "/logInfo/") ||
 				strings.Contains(path, "/news/") || strings.Contains(path, "/message/") ||
 				strings.HasSuffix(path, "/bus/toCustomerManager.action") {
-				c.JSON(http.StatusForbidden, gin.H{"code": -1, "msg": "无权限访问"})
+
+				// 如果是页面请求，抛出提示并返回首页；如果是 API ajax 请求，返回 JSON
+				if strings.HasSuffix(path, ".action") && !strings.Contains(path, "load") && !strings.Contains(path, "delete") && !strings.Contains(path, "update") && !strings.Contains(path, "save") && !strings.Contains(path, "add") && !strings.Contains(path, "check") && !strings.Contains(path, "init") {
+					c.String(http.StatusForbidden, "<script>alert('无权限访问此模块'); window.location.href='"+basePath+"/desk/toDeskManager.action';</script>")
+				} else {
+					c.JSON(http.StatusForbidden, gin.H{"code": -1, "msg": "无权限访问"})
+				}
 				c.Abort()
 				return
 			}
