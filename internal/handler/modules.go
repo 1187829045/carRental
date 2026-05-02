@@ -36,7 +36,7 @@ func registerMenuRoutes(rg *gin.RouterGroup, d Deps) {
 		available := 1
 		menus, err := d.MenuService.QueryAllMenus(c.Request.Context(), available)
 		if err != nil {
-			fail(c, "查询菜单失败")
+			c.JSON(http.StatusOK, DataGridView{Code: 0, Msg: "菜单树加载失败", Data: []model.MenuManagerNode{}})
 			return
 		}
 		var data []model.MenuManagerNode

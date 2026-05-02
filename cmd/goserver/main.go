@@ -28,14 +28,13 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
-	mysqlDB, err := db.OpenMySQL(cfg.MySQLDSN)
+	mysqlDB, err := db.OpenMySQLAutoCreateDB(cfg.MySQLDSN)
 	if err != nil {
 		log.Fatalf("open mysql: %v", err)
 	}
 	defer mysqlDB.Close()
-
-	if ensureErr := service.EnsureFranchiseeTable(context.Background(), mysqlDB); ensureErr != nil {
-		log.Fatalf("ensure franchisee table: %v", ensureErr)
+	if err := (service.DBInit{ProjectRoot: projectRoot}).EnsureSchemaAndSeed(context.Background(), mysqlDB); err != nil {
+		log.Fatalf("db init: %v", err)
 	}
 
 	fileService, err := service.NewFileService(projectRoot)

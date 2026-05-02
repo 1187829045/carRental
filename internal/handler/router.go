@@ -382,6 +382,8 @@ func drawCaptcha(code string, w, h int) image.Image {
 		Dot:  fixed.P(10, 24),
 	}
 	d.DrawString(code)
+	d.Dot = fixed.P(11, 24)
+	d.DrawString(code)
 	return img
 }
 

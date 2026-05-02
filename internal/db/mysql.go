@@ -2,9 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	mysql "github.com/go-sql-driver/mysql"
 )
 
 func OpenMySQL(dsn string) (*sql.DB, error) {
@@ -23,3 +25,33 @@ func OpenMySQL(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
+func OpenMySQLAutoCreateDB(dsn string) (*sql.DB, error) {
+	db, err := OpenMySQL(dsn)
+	if err == nil {
+		return db, nil
+	}
+	if !strings.Contains(err.Error(), "Unknown database") {
+		return nil, err
+	}
+	cfg, parseErr := mysql.ParseDSN(dsn)
+	if parseErr != nil {
+		return nil, err
+	}
+	dbName := cfg.DBName
+	if dbName == "" {
+		return nil, err
+	}
+	cfg.DBName = ""
+	admin, adminErr := sql.Open("mysql", cfg.FormatDSN())
+	if adminErr != nil {
+		return nil, err
+	}
+	defer admin.Close()
+	if pingErr := admin.Ping(); pingErr != nil {
+		return nil, err
+	}
+	if _, execErr := admin.Exec("CREATE DATABASE IF NOT EXISTS `" + dbName + "` DEFAULT CHARACTER SET utf8"); execErr != nil {
+		return nil, execErr
+	}
+	return OpenMySQL(dsn)
+}
