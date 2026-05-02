@@ -31,7 +31,7 @@ func registerModules(authed *gin.RouterGroup, d Deps) {
 }
 
 func registerMenuRoutes(rg *gin.RouterGroup, d Deps) {
-	rg.GET("/menu/loadMenuManagerLeftTreeJson.action", func(c *gin.Context) {
+	loadMenuManagerLeftTree := func(c *gin.Context) {
 		spread := c.Query("spread")
 		available := 1
 		menus, err := d.MenuService.QueryAllMenus(c.Request.Context(), available)
@@ -53,7 +53,9 @@ func registerMenuRoutes(rg *gin.RouterGroup, d Deps) {
 			})
 		}
 		c.JSON(http.StatusOK, NewData(data))
-	})
+	}
+	rg.GET("/menu/loadMenuManagerLeftTreeJson.action", loadMenuManagerLeftTree)
+	rg.POST("/menu/loadMenuManagerLeftTreeJson.action", loadMenuManagerLeftTree)
 
 	rg.GET("/menu/loadAllMenu.action", func(c *gin.Context) {
 		page := intParam(c, "page")
