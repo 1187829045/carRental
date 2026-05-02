@@ -697,12 +697,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			c.JSON(http.StatusOK, nil)
 			return
 		}
-		if u, ok := getSessionUser(c); ok && u.Type != 1 {
-			if x.OperId != u.UserID {
-				c.JSON(http.StatusOK, nil)
-				return
-			}
-		}
+		// Removed ownership filtering per requirements
 		c.JSON(http.StatusOK, x)
 	})
 	rg.POST("/check/initCheckFormData.action", func(c *gin.Context) {
@@ -712,12 +707,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			return
 		}
 		if u, ok := getSessionUser(c); ok {
-			if u.Type != 1 {
-				if rent, ok := data["rent"].(*model.Rent); ok && rent.OperId != u.UserID {
-					c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限操作他人的出租单"})
-					return
-				}
-			}
+			// Removed ownership filtering for check-in process
 			if check, ok := data["check"].(model.Check); ok {
 				check.OperId = u.UserID
 				check.OperName = u.RealName

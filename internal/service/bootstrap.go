@@ -23,7 +23,11 @@ CREATE TABLE IF NOT EXISTS bus_franchisee (
 		"ALTER TABLE bus_car ADD COLUMN operid INT DEFAULT 1",
 		"ALTER TABLE bus_rent ADD COLUMN operid INT DEFAULT 1",
 		"ALTER TABLE bus_check ADD COLUMN operid INT DEFAULT 1",
-		// 1. 根据现有的 opername (中文名) 映射到正确的 userid
+		// 1.1 修复"章三"笔误，将其统一修正为"张三"以确保匹配一致性
+		"UPDATE bus_car SET opername = '张三' WHERE opername = '章三'",
+		"UPDATE bus_rent SET opername = '张三' WHERE opername = '章三'",
+		"UPDATE bus_check SET opername = '张三' WHERE opername = '章三'",
+		// 1.2 根据现有的 opername (中文名) 映射到正确的 userid
 		"UPDATE bus_car bc JOIN sys_user su ON bc.opername = su.realname SET bc.operid = su.userid WHERE bc.opername IS NOT NULL",
 		"UPDATE bus_rent br JOIN sys_user su ON br.opername = su.realname SET br.operid = su.userid WHERE br.opername IS NOT NULL",
 		"UPDATE bus_check bc JOIN sys_user su ON bc.opername = su.realname SET bc.operid = su.userid WHERE bc.opername IS NOT NULL",
