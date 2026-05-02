@@ -400,9 +400,33 @@ iframe {
 /*layui-body*/
 .layui-body {
     overflow: hidden;
-    border-top: 5px solid #393D49;
-    border-left: 2px solid #393D49;
+    border-top: none;
+    border-left: none;
     background: #fff;
+    position: relative;
+}
+
+.layui-body:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(47, 128, 255, 0), rgba(47, 128, 255, 0.38), rgba(47, 128, 255, 0));
+    pointer-events: none;
+}
+
+.layui-body:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(47, 128, 255, 0.26), rgba(15, 23, 42, 0.08));
+    box-shadow: 1px 0 14px rgba(15, 23, 42, 0.06);
+    pointer-events: none;
 }
 
 #top_tabs_box {
@@ -550,8 +574,20 @@ iframe {
 .footer {
     text-align: center;
     line-height: 44px;
-    border-left: 2px solid #1AA094;
+    border-left: none;
     z-index: 999;
+    position: relative;
+}
+
+.footer:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(47, 128, 255, 0.22), rgba(15, 23, 42, 0.06));
+    pointer-events: none;
 }
 
 /*响应式样式*/
@@ -615,7 +651,7 @@ iframe {
     }
 
     .layui-body, .layui-layout-admin .layui-footer {
-        left: -2px;
+        left: 0;
     }
 }
 
