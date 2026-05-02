@@ -294,7 +294,7 @@
             , cellMinWidth: 100 //设置列的最小默认宽度
             , page: true  //是否启用分页
             , cols: [[   //列表数据
-                , {field: 'rentid', title: '出租单号', align: 'center', width: '251'}
+                {field: 'rentid', title: '出租单号', align: 'center', width: '251'}
                 , {field: 'identity', title: '身份证号', align: 'center', width: '180'}
                 , {field: 'carnumber', title: '车牌号', align: 'center', width: '105'}
                 , {field: 'price', title: '出租价格', align: 'center', width: '90'}

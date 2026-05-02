@@ -679,6 +679,14 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		}
 		c.JSON(http.StatusOK, CheckSuccess)
 	})
+	rg.POST("/rent/checkCustomerExist.action", func(c *gin.Context) {
+		customer, err := d.BusService.GetCustomer(c.Request.Context(), c.PostForm("identity"))
+		if err != nil || customer == nil {
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "客户不存在"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "存在"})
+	})
 	rg.GET("/rent/loadAllRent.action", func(c *gin.Context) {
 		q := flatQuery(c)
 		if u, ok := getSessionUser(c); ok && u.Type != 1 {

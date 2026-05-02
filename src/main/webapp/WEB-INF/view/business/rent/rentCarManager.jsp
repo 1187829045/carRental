@@ -160,7 +160,7 @@
                 , height: 'full-150'
                 , page: true  //是否启用分页
                 , cols: [[   //列表数据
-                    , {field: 'carnumber', title: '车牌号', align: 'center', width: '104'}
+                    {field: 'carnumber', title: '车牌号', align: 'center', width: '104'}
                     , {field: 'cartype', title: '出租类型', align: 'center', width: '90'}
                     , {field: 'color', title: '出租颜色', align: 'center', width: '90'}
                     , {field: 'price', title: '汽车价格', align: 'center', width: '90'}

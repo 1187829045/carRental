@@ -183,8 +183,8 @@
         $("#doSearch").click(function () {
             var rentid = $("#search_rentid").val();
             $.post("${yeqifu}/check/checkRentExist.action", {rentid: rentid}, function (obj) {
-                if (obj === "") { //出租单号不存在，返回值为null
-                    layer.msg("您输入的出租单号不存在，请更正后再查询");
+                if (obj === "" || obj === null) { //出租单号不存在，返回值为null
+                    layer.msg("您输入的出租单号不存在或无权操作，请更正后再查询");
                     //隐藏数据表格
                     $("#content").hide();
                 } else {
@@ -203,6 +203,11 @@
         //加载表单数据和 卡片面板数据
         function initCheckFormData(rentid) {
             $.post("${yeqifu}/check/initCheckFormData.action",{rentid:rentid},function (obj) {
+                if (obj.code === -1) {
+                    layer.msg(obj.msg);
+                    $("#content").hide();
+                    return;
+                }
                 //检查单
                 var check=obj.check;
                 form.val("checkFrm",check);
