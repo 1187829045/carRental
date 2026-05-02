@@ -16,7 +16,7 @@ type DBInit struct {
 
 func (d DBInit) EnsureSchemaAndSeed(ctx context.Context, db *sql.DB) error {
 	extraSQL := filepath.Join(d.ProjectRoot, "scripts", "extra.sql")
-	if err := execSQLFile(ctx, db, extraSQL); err != nil {
+	if err := execSQLFileIfExists(ctx, db, extraSQL); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
@@ -29,10 +29,16 @@ func (d DBInit) EnsureSchemaAndSeed(ctx context.Context, db *sql.DB) error {
 	}
 
 	baseSQL := filepath.Join(d.ProjectRoot, "sql")
-	if err := execSQLFile(ctx, db, baseSQL); err != nil {
+	if err := execSQLFileIfExists(ctx, db, baseSQL); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("db init: init sql file not found: %s", baseSQL)
+		}
 		return err
 	}
-	return execSQLFile(ctx, db, extraSQL)
+	if err := execSQLFileIfExists(ctx, db, extraSQL); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
 
 func hasTable(ctx context.Context, db *sql.DB, name string) (bool, error) {
@@ -58,6 +64,13 @@ func execSQLFile(ctx context.Context, db *sql.DB, filePath string) error {
 		}
 	}
 	return nil
+}
+
+func execSQLFileIfExists(ctx context.Context, db *sql.DB, filePath string) error {
+	if _, err := os.Stat(filePath); err != nil {
+		return err
+	}
+	return execSQLFile(ctx, db, filePath)
 }
 
 func parseSQLStatements(r *os.File) ([]string, error) {
@@ -141,4 +154,3 @@ func shortSQL(s string) string {
 	}
 	return s[:80]
 }
-
