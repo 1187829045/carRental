@@ -691,19 +691,6 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		}
 		c.JSON(http.StatusOK, CheckSuccess)
 	})
-	rg.GET("/rent/loadAllRent.action", func(c *gin.Context) {
-		q := flatQuery(c)
-		if u, ok := getSessionUser(c); ok && u.Type != 1 {
-			q["operid"] = fmt.Sprint(u.UserID)
-		}
-		count, data, err := d.BusService.QueryRents(c.Request.Context(), q)
-		if err != nil {
-			fail(c, "查询出租单失败")
-			return
-		}
-		c.JSON(http.StatusOK, NewPage(count, data))
-	})
-
 	rg.POST("/check/checkRentExist.action", func(c *gin.Context) {
 		x, err := d.BusService.GetRent(c.Request.Context(), c.PostForm("rentid"))
 		if err != nil || x == nil {
