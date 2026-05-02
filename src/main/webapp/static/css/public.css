@@ -177,15 +177,12 @@ h2.method{ font-size:18px; line-height:45px; padding-left:5px;}
     letter-spacing: 1px;
     color: #ff6700;
     padding-top: 0;
-    margin-top: -78px;
+    margin-top: -100px;
     margin-bottom: 36px;
     text-shadow: 0 10px 24px rgba(255, 103, 0, 0.22);
 }
 
-.loginBody:not(.login-modern) .login_face{
-    margin: 44px auto 18px;
-}
-.loginBody:not(.login-modern) .login_face{ margin:-55px auto 20px; width:100px; height:100px; -webkit-border-radius:50%; -moz-border-radius:50%; border-radius:50%; border:5px solid #fff; overflow:hidden;box-shadow:0 0 30px #009688;}
+.loginBody:not(.login-modern) .login_face{ margin: 60px auto 20px; width:100px; height:100px; -webkit-border-radius:50%; -moz-border-radius:50%; border-radius:50%; border:5px solid #fff; overflow:hidden;box-shadow:0 0 30px #009688;}
 .loginBody:not(.login-modern) .login_face img{ width:100%;}
 .loginBody:not(.login-modern) .layui-form-item{ position:relative;}
 .loginBody:not(.login-modern) .layui-form-item label{ position:absolute; color:#757575; left:10px; top:9px; line-height:20px; background:#fff; padding:0 5px; font-size:14px; cursor:text;}
