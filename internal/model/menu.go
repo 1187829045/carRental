@@ -14,13 +14,13 @@ type Menu struct {
 
 // TreeNode matches the JSON fields consumed by LayUI on the index left menu.
 type TreeNode struct {
-	ID     int        `json:"id"`
-	Pid    int        `json:"pid"`
-	Title  string     `json:"title"`
-	Icon   *string    `json:"icon,omitempty"`
-	Href   *string    `json:"href,omitempty"`
-	Spread bool       `json:"spread"`
-	Target *string    `json:"target,omitempty"`
-	Child  []TreeNode `json:"children,omitempty"`
+	ID       int        `json:"id"`
+	ParentID int        `json:"parentId"`
+	Title    string     `json:"title"`
+	Icon     *string    `json:"icon,omitempty"`
+	Href     *string    `json:"href,omitempty"`
+	Spread   bool       `json:"spread"`
+	Target   *string    `json:"target,omitempty"`
+	Child    []TreeNode `json:"children,omitempty"`
+	CheckArr string     `json:"checkArr"`
 }
-

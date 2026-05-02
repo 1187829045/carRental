@@ -36,18 +36,21 @@ func registerMenuRoutes(rg *gin.RouterGroup, d Deps) {
 		available := 1
 		menus, err := d.MenuService.QueryAllMenus(c.Request.Context(), available)
 		if err != nil {
-			c.JSON(http.StatusOK, DataGridView{Code: 0, Msg: "菜单树加载失败", Data: []model.MenuManagerNode{}})
+			c.JSON(http.StatusOK, DataGridView{Code: 0, Msg: "菜单树加载失败", Data: []model.TreeNode{}})
 			return
 		}
-		var data []model.MenuManagerNode
+		data := make([]model.TreeNode, 0, len(menus))
 		for _, m := range menus {
-			node := model.MenuManagerNode{
+			data = append(data, model.TreeNode{
 				ID:       m.ID,
 				ParentID: m.Pid,
 				Title:    m.Title,
+				Icon:     m.Icon,
+				Href:     m.Href,
 				Spread:   m.Spread == 1 || spread == "1",
-			}
-			data = append(data, node)
+				Target:   m.Target,
+				CheckArr: "0",
+			})
 		}
 		c.JSON(http.StatusOK, NewData(data))
 	})

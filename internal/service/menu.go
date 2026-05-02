@@ -149,19 +149,20 @@ func MenusToTree(menus []model.Menu, rootID int) []model.TreeNode {
 	nodes := make([]model.TreeNode, 0, len(menus))
 	for _, m := range menus {
 		nodes = append(nodes, model.TreeNode{
-			ID:     m.ID,
-			Pid:    m.Pid,
-			Title:  m.Title,
-			Icon:   m.Icon,
-			Href:   m.Href,
-			Spread: m.Spread == 1,
-			Target: m.Target,
+			ID:       m.ID,
+			ParentID: m.Pid,
+			Title:    m.Title,
+			Icon:     m.Icon,
+			Href:     m.Href,
+			Spread:   m.Spread == 1,
+			Target:   m.Target,
+			CheckArr: "0",
 		})
 	}
 
 	byPID := make(map[int][]model.TreeNode, len(nodes))
 	for _, n := range nodes {
-		byPID[n.Pid] = append(byPID[n.Pid], n)
+		byPID[n.ParentID] = append(byPID[n.ParentID], n)
 	}
 
 	var build func(pid int) []model.TreeNode
