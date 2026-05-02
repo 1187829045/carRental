@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -905,7 +906,7 @@ func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 	st, _ := f.Stat()
 	if attachment {
 		name := filepath.Base(abs)
-		c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": name}))
+		setAttachmentFilename(c, name)
 	}
 	if ct := mime.TypeByExtension(filepath.Ext(abs)); ct != "" {
 		c.Header("Content-Type", ct)
@@ -917,6 +918,25 @@ func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 }
 func downloadBytes(c *gin.Context, body []byte, filename string) {
 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": filename}))
-	c.Data(http.StatusCreated, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", body)
+	setAttachmentFilename(c, filename)
+	c.Header("X-Content-Type-Options", "nosniff")
+	c.Data(http.StatusOK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", body)
+}
+
+func setAttachmentFilename(c *gin.Context, filename string) {
+	filename = strings.TrimSpace(filename)
+	if filename == "" {
+		filename = "download"
+	}
+	ascii := make([]rune, 0, len(filename))
+	for _, r := range filename {
+		if r >= 32 && r < 127 && r != '"' && r != '\\' {
+			ascii = append(ascii, r)
+		} else {
+			ascii = append(ascii, '_')
+		}
+	}
+	fallback := string(ascii)
+	encoded := url.PathEscape(filename)
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fallback, encoded))
 }

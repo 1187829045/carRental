@@ -322,6 +322,13 @@ iframe {
     top: 0;
 }
 
+.top_menu .layui-nav-img.userAvatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 10px !important;
+    object-fit: cover;
+}
+
 .layui-layout-admin .layui-side {
     left: 0;
     overflow: hidden;
