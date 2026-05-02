@@ -47,7 +47,7 @@
             menuTree = dtree.render({
                 elem: "#menuTree",
                 dataStyle: "layuiStyle",  //使用layui风格的数据格式
-                response: {statusName: "code", statusCode: 0, message: "msg", root: "data"},
+                response: {statusName: "code", statusCode: 0, message: "msg", rootName: "data"},
                 dataFormat: "list",  //配置data的风格为list
                 url: "${yeqifu}/menu/loadMenuManagerLeftTreeJson.action?spread=1" // 使用url加载（可与data加载同时存在）
             });

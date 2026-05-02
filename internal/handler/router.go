@@ -178,7 +178,7 @@ func NewRouter(d Deps) *gin.Engine {
 		sess.Set("code", code)
 		_ = sess.Save()
 
-		img := drawCaptcha(code, 180, 50)
+		img := drawCaptcha(code, 160, 50)
 		c.Header("Content-Type", "image/jpeg")
 		_ = jpeg.Encode(c.Writer, img, &jpeg.Options{Quality: 85})
 	})
@@ -259,7 +259,7 @@ func requireLogin(basePath string) gin.HandlerFunc {
 				p = "/"
 			}
 		}
-		if p == "/menu/loadMenuManagerLeftTreeJson.action" || p == "/menu/loadAllMenu.action" {
+		if strings.Contains(p, "/menu/loadMenuManagerLeftTreeJson.action") || strings.Contains(p, "/menu/loadAllMenu.action") {
 			c.Next()
 			return
 		}
