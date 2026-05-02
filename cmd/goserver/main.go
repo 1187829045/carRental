@@ -40,6 +40,11 @@ func main() {
 		log.Fatalf("db init: %v", err)
 	}
 
+	// 执行动态表结构和安全字段迁移（如增加operid字段，分配默认属主）
+	if err := service.EnsureFranchiseeTable(context.Background(), mysqlDB); err != nil {
+		log.Fatalf("db migrate: %v", err)
+	}
+
 	fileService, err := service.NewFileService(projectRoot)
 	if err != nil {
 		log.Fatalf("init file service: %v", err)
