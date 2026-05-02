@@ -190,6 +190,26 @@ h2.method{ font-size:18px; line-height:45px; padding-left:5px;}
 .loginBody:not(.login-modern) .layui-form-item label{ position:absolute; color:#757575; left:10px; top:9px; line-height:20px; background:#fff; padding:0 5px; font-size:14px; cursor:text;}
 .loginBody:not(.login-modern) .layui-form-item.layui-input-focus label{ top:-10px; font-size:12px; color:#ff6700;}
 .loginBody:not(.login-modern) .layui-form-item.layui-input-active label{ top:-10px; font-size:12px;}
+
+/* 将“输入框内的文字(label)”移到输入框上方：仅作用于旧版登录页 input-item */
+.loginBody:not(.login-modern) .input-item{ padding-top: 18px; }
+.loginBody:not(.login-modern) .input-item label{
+    position: static;
+    display: block;
+    background: transparent;
+    padding: 0;
+    margin: -6px 0 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ff6700;
+    cursor: default;
+}
+.loginBody:not(.login-modern) .input-item.layui-input-focus label,
+.loginBody:not(.login-modern) .input-item.layui-input-active label{
+    top: auto;
+    font-size: 13px;
+}
+.loginBody:not(.login-modern) .input-item .layui-input{ padding-left: 12px; }
 .loginBody:not(.login-modern) .layui-input::-webkit-input-placeholder{color:#fff;}
 .loginBody:not(.login-modern) .layui-input::-moz-placeholder{color:#fff;}
 .loginBody:not(.login-modern) .layui-input:-ms-input-placeholder{color:#fff;}
