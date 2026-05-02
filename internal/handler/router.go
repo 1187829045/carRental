@@ -255,6 +255,31 @@ func NewRouter(d Deps) *gin.Engine {
 
 	authed := root.Group("/")
 	authed.Use(requireLogin(basePath))
+	authed.Use(func(c *gin.Context) {
+		u, ok := getSessionUser(c)
+		if !ok {
+			return
+		}
+		if u.Type != 1 {
+			path := c.Request.URL.Path
+			// 允许修改密码
+			if strings.Contains(path, "ChangePassword") || strings.Contains(path, "changePassword") {
+				c.Next()
+				return
+			}
+			// 拦截客户管理、系统管理、统计分析
+			if strings.Contains(path, "/customer/") || strings.Contains(path, "/sys/") ||
+				strings.Contains(path, "/stat/") || strings.Contains(path, "/user/") ||
+				strings.Contains(path, "/role/") || strings.Contains(path, "/logInfo/") ||
+				strings.Contains(path, "/news/") || strings.Contains(path, "/message/") ||
+				strings.HasSuffix(path, "/bus/toCustomerManager.action") {
+				c.JSON(http.StatusForbidden, gin.H{"code": -1, "msg": "无权限访问"})
+				c.Abort()
+				return
+			}
+		}
+		c.Next()
+	})
 
 	// Desk
 	authed.GET("/desk/toDeskManager.action", func(c *gin.Context) {
@@ -311,6 +336,18 @@ func NewRouter(d Deps) *gin.Engine {
 			c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "db error"})
 			return
 		}
+
+		if u.Type != 1 {
+			var filtered []model.Menu
+			for _, m := range menus {
+				if m.Title == "统计分析" || m.Title == "系统管理" || m.Title == "客户管理" {
+					continue
+				}
+				filtered = append(filtered, m)
+			}
+			menus = filtered
+		}
+
 		c.JSON(http.StatusOK, service.MenusToTree(menus, 1))
 	})
 

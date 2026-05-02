@@ -13,6 +13,7 @@ type Car struct {
 	Description string    `json:"description"`
 	CarImg      string    `json:"carimg"`
 	CreateTime  time.Time `json:"createtime"`
+	OperName    string    `json:"opername"`
 }
 
 type Customer struct {

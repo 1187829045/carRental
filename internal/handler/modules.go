@@ -418,7 +418,11 @@ func registerSystemRoutes(rg *gin.RouterGroup, d Deps) {
 
 func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 	rg.GET("/car/loadAllCar.action", func(c *gin.Context) {
-		count, data, err := d.BusService.QueryCars(c.Request.Context(), flatQuery(c))
+		q := flatQuery(c)
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			q["opername"] = u.RealName
+		}
+		count, data, err := d.BusService.QueryCars(c.Request.Context(), q)
 		if err != nil {
 			fail(c, "查询车辆失败")
 			return
@@ -426,6 +430,10 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, NewPage(count, data))
 	})
 	rg.POST("/car/addCar.action", func(c *gin.Context) {
+		opername := c.PostForm("opername")
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			opername = u.RealName
+		}
 		x := model.Car{
 			CarNumber:   c.PostForm("carnumber"),
 			CarType:     c.PostForm("cartype"),
@@ -437,6 +445,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			Description: c.PostForm("description"),
 			CarImg:      c.PostForm("carimg"),
 			CreateTime:  time.Now(),
+			OperName:    opername,
 		}
 		if x.CarImg == "" {
 			x.CarImg = defaultCarImage
@@ -448,8 +457,16 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, AddSuccess)
 	})
 	rg.POST("/car/updateCar.action", func(c *gin.Context) {
+		carnumber := c.PostForm("carnumber")
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			car, err := d.BusService.GetCar(c.Request.Context(), carnumber)
+			if err != nil || car == nil || car.OperName != u.RealName {
+				c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限修改他人的车辆"})
+				return
+			}
+		}
 		x := model.Car{
-			CarNumber:   c.PostForm("carnumber"),
+			CarNumber:   carnumber,
 			CarType:     c.PostForm("cartype"),
 			Color:       c.PostForm("color"),
 			Price:       floatParam(c, "price"),
@@ -458,6 +475,7 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			IsRenting:   intParam(c, "isrenting"),
 			Description: c.PostForm("description"),
 			CarImg:      c.PostForm("carimg"),
+			OperName:    c.PostForm("opername"),
 		}
 		if err := d.BusService.UpdateCar(c.Request.Context(), x); err != nil {
 			c.JSON(http.StatusOK, UpdateError)
@@ -466,14 +484,32 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 		c.JSON(http.StatusOK, UpdateSuccess)
 	})
 	rg.POST("/car/deleteCar.action", func(c *gin.Context) {
-		if err := d.BusService.DeleteCar(c.Request.Context(), c.PostForm("carnumber")); err != nil {
+		carnumber := c.PostForm("carnumber")
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			car, err := d.BusService.GetCar(c.Request.Context(), carnumber)
+			if err != nil || car == nil || car.OperName != u.RealName {
+				c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限删除他人的车辆"})
+				return
+			}
+		}
+		if err := d.BusService.DeleteCar(c.Request.Context(), carnumber); err != nil {
 			c.JSON(http.StatusOK, DeleteError)
 			return
 		}
 		c.JSON(http.StatusOK, DeleteSuccess)
 	})
 	rg.POST("/car/deleteBatchCar.action", func(c *gin.Context) {
-		for _, id := range stringArrayParam(c, "ids") {
+		ids := stringArrayParam(c, "ids")
+		if u, ok := getSessionUser(c); ok && u.Type != 1 {
+			for _, id := range ids {
+				car, err := d.BusService.GetCar(c.Request.Context(), id)
+				if err != nil || car == nil || car.OperName != u.RealName {
+					c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限删除他人的车辆"})
+					return
+				}
+			}
+		}
+		for _, id := range ids {
 			if err := d.BusService.DeleteCar(c.Request.Context(), id); err != nil {
 				c.JSON(http.StatusOK, DeleteError)
 				return

@@ -14,7 +14,12 @@ CREATE TABLE IF NOT EXISTS bus_franchisee (
   phone VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8`)
-	return err
+	if err != nil {
+		return err
+	}
+	// 动态为 bus_car 增加 opername 列（如果不存在）
+	db.ExecContext(ctx, "ALTER TABLE bus_car ADD COLUMN opername VARCHAR(255) DEFAULT 'admin'")
+	return nil
 }
 
 func StartTempFileCleanup(fileService *FileService) func() {
