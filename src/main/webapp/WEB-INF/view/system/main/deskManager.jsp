@@ -575,15 +575,15 @@
             <div class="stats-card__icon orange"><i class="layui-icon">&#xe770;</i></div>
             <div class="stats-card__label">出租订单数量</div>
             <div class="stats-card__value" id="rentOrderCount">--</div>
-            <div class="stats-card__desc">统计周期内已完成或进行中的订单总量</div>
-            <div class="stats-card__foot">支持按日、周、月切换统计范围</div>
+            <div class="stats-card__desc">当前系统内所有未归还出租单总数</div>
+            <div class="stats-card__foot">排除已归还、已完成和已取消订单</div>
         </div>
         <div class="dashboard-card stats-card">
             <div class="stats-card__icon purple"><i class="layui-icon">&#xe63c;</i></div>
             <div class="stats-card__label">注册客户总量</div>
             <div class="stats-card__value" id="customerCount">--</div>
-            <div class="stats-card__desc">统计周期内新增注册客户数量</div>
-            <div class="stats-card__foot" id="customerRangeText">当前按本月口径统计</div>
+            <div class="stats-card__desc">系统内全部注册客户账户数量</div>
+            <div class="stats-card__foot" id="customerRangeText">已删除客户不计入统计</div>
         </div>
     </div>
 
@@ -820,7 +820,7 @@
             $('#dashboardRangeHint').text('统计周期：' + (data.rangeLabel || '--'));
             $('#dashboardRefreshTime').text('更新时间：' + formatDateTime(data.refreshedAt));
             $('#vehicleScopeText').text('统计口径：' + (data.vehicleScopeLabel || '实时库存快照'));
-            $('#customerRangeText').text('当前按' + (data.rangeLabel || '--') + '口径统计');
+            $('#customerRangeText').text('统计口径：全部注册客户（已删除客户不计）');
             if (showToast) {
                 layer.msg('首页指标已刷新');
             }

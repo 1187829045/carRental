@@ -36,10 +36,10 @@ func (s *StatService) LoadDashboardMetrics(ctx context.Context, rangeType string
 	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_car WHERE COALESCE(isrenting, 0) = 0`).Scan(&metrics.IdleCarCount); err != nil {
 		return nil, err
 	}
-	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_rent WHERE createtime >= ? AND createtime < ?`, start, end).Scan(&metrics.RentOrderCount); err != nil {
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_rent WHERE COALESCE(rentflag, 0) <> 1`).Scan(&metrics.RentOrderCount); err != nil {
 		return nil, err
 	}
-	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_customer WHERE createtime >= ? AND createtime < ?`, start, end).Scan(&metrics.CustomerCount); err != nil {
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_customer`).Scan(&metrics.CustomerCount); err != nil {
 		return nil, err
 	}
 	return metrics, nil
