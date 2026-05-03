@@ -231,7 +231,7 @@
                 , {field: 'description', title: '车辆描述', align: 'center', width: '150'}
                 , {
                     field: 'carimg', title: '缩略图', align: 'center', width: '80', templet: function (d) {
-                        return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + " onerror=\"this.onerror=null;this.src='${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg';\"/>";
+                        return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src='" + buildCarImageUrl(d.carimg) + "' onerror=\"this.onerror=null;this.src='" + buildCarImageUrl(defaultCarImage) + "';\"/>";
                     }
                 }
                 , {field: 'createtime', title: '录入时间', align: 'center', width: '165'}
@@ -294,6 +294,12 @@
 
         var url;
         var mainIndex;
+    var defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200";
+
+    function buildCarImageUrl(path) {
+        var finalPath = path || defaultCarImage;
+        return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+    }
 
         //打开添加页面
         function openAddCar() {
@@ -306,8 +312,8 @@
                     //清空表单数据
                     $("#dataFrm")[0].reset();
                     //设置默认图片
-                    $("#showCarImg").attr("src", "${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg");
-                    $("#carimg").val("static/images/cars/placeholder-1.svg");
+                    $("#showCarImg").attr("src", buildCarImageUrl(defaultCarImage));
+                    $("#carimg").val(defaultCarImage);
                     url = "${yeqifu}/car/addCar.action";
                     $("#carnumber").removeAttr("readonly","readonly");
                 }
@@ -323,7 +329,7 @@
                 area: ['780px', '510px'],
                 success: function (index) {
                     form.val("dataFrm", data);
-                    $("#showCarImg").attr("src", "${yeqifu}/file/downloadShowFile.action?path=" + data.carimg);
+                    $("#showCarImg").attr("src", buildCarImageUrl(data.carimg));
                     url = "${yeqifu}/car/updateCar.action";
                     $("#carnumber").attr("readonly","readonly");
                 }
@@ -374,7 +380,7 @@
             acceptMime: 'images/*',
             field: "mf",
             done: function (res, index, upload) {
-                $('#showCarImg').attr('src', "${yeqifu}/file/downloadShowFile.action?path=" + res.data.src);
+                $('#showCarImg').attr('src', buildCarImageUrl(res.data.src));
                 $('#carimg').val(res.data.src);
                 $('#carimgDiv').css("background", "#fff");
             }
@@ -388,7 +394,7 @@
                 content: $("#viewCarImageDiv"),
                 area: ['750px', '500px'],
                 success: function (index) {
-                    $("#view_carimg").attr("src","${yeqifu}/file/downloadShowFile.action?path="+data.carimg);
+                    $("#view_carimg").attr("src", buildCarImageUrl(data.carimg));
                 }
             });
         }

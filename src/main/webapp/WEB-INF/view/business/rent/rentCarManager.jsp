@@ -151,6 +151,13 @@
             type:'datetime'
         });
 
+        var defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200";
+
+        function buildCarImageUrl(path) {
+            var finalPath = path || defaultCarImage;
+            return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+        }
+
         function normalizeIdentity(value) {
             return $.trim(value || "").replace(/[^0-9xX]/g, "").toUpperCase();
         }
@@ -182,7 +189,7 @@
                     , {field: 'description', title: '出租描述', align: 'center', width: '160'}
                     , {
                         field: 'carimg', title: '缩略图', align: 'center', width: '80', templet: function (d) {
-                            return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + " onerror=\"this.onerror=null;this.src='${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg';\"/>";
+                            return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src='" + buildCarImageUrl(d.carimg) + "' onerror=\"this.onerror=null;this.src='" + buildCarImageUrl(defaultCarImage) + "';\"/>";
                         }
                     }
                     , {field: 'createtime', title: '录入时间', align: 'center', width: '170'}
@@ -280,7 +287,7 @@
                 content: $("#viewCarImageDiv"),
                 area: ['750px', '500px'],
                 success: function (index) {
-                    $("#view_carimg").attr("src", "${yeqifu}/file/downloadShowFile.action?path=" + data.carimg);
+                    $("#view_carimg").attr("src", buildCarImageUrl(data.carimg));
                 }
             });
         }

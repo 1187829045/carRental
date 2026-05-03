@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS bus_franchisee (
 		"ALTER TABLE bus_car ADD COLUMN operid INT DEFAULT 1",
 		"ALTER TABLE bus_rent ADD COLUMN operid INT DEFAULT 1",
 		"ALTER TABLE bus_check ADD COLUMN operid INT DEFAULT 1",
-		"UPDATE bus_car SET carimg = 'static/images/cars/placeholder-1.svg' WHERE carimg IS NULL OR TRIM(carimg) = '' OR carimg = 'images/defaultcarimage.jpg'",
+		"UPDATE bus_car SET carimg = 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200' WHERE carimg IS NULL OR TRIM(carimg) = '' OR carimg = 'images/defaultcarimage.jpg' OR carimg = 'static/images/cars/placeholder-1.svg'",
 		// 1.1 修复"章三"笔误，将其统一修正为"张三"以确保匹配一致性
 		"UPDATE bus_car SET opername = '张三' WHERE opername = '章三'",
 		"UPDATE bus_rent SET opername = '张三' WHERE opername = '章三'",
@@ -59,7 +59,7 @@ const (
 	mockRentIDPrefix        = "MOCKRENT_"
 	mockCarNumberPrefix     = "MOCKCAR-"
 	mockCustomerNamePrefix  = "MockCustomer"
-	defaultMockCarImagePath = "static/images/cars/placeholder-1.svg"
+	defaultMockCarImagePath = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200"
 )
 
 type mockOperationalSeed struct {

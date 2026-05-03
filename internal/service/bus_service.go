@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultCarImg = "static/images/cars/placeholder-1.svg"
+	defaultCarImg = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200"
 	fileUploadTmp = "_temp"
 )
 

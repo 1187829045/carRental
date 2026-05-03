@@ -178,6 +178,12 @@
         var table = layui.table;
         var dtree = layui.dtree;
         var laydate = layui.laydate;
+        var defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200";
+
+        function buildCarImageUrl(path) {
+            var finalPath = path || defaultCarImage;
+            return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+        }
 
         //根据出租单号查询
         $("#doSearch").click(function () {
@@ -239,7 +245,7 @@
                 $("#car_rentprice").html("出租价格: "+car.rentprice);
                 $("#car_deposit").html("出租押金: "+car.deposit);
                 $("#car_description").html("车辆描述: "+car.description);
-                $("#car_carimg").attr("src","${yeqifu}/file/downloadShowFile.action?path="+car.carimg);
+                $("#car_carimg").attr("src", buildCarImageUrl(car.carimg));
             })
         }
         //保存
@@ -257,4 +263,3 @@
 </script>
 </body>
 </html>
-

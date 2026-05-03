@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	defaultCarImage = "static/images/cars/placeholder-1.svg"
+	defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200"
 	uploadTempTag   = "_temp"
 )
 
@@ -1028,8 +1028,16 @@ func newUploadName(old string, temp bool) string {
 	return name + ext
 }
 func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
+	if remote := resolveRemoteImageURL(rel); remote != "" {
+		c.Redirect(http.StatusFound, remote)
+		return
+	}
 	abs, err := service.SafeJoin(d.FileService.UploadRoot, rel)
 	if err != nil {
+		if remote := fallbackRemoteCarImageURL(d); remote != "" {
+			c.Redirect(http.StatusFound, remote)
+			return
+		}
 		if fallback := resolveStaticCarImage(d, rel); fallback != "" {
 			serveStaticAssetFile(c, fallback, attachment)
 			return
@@ -1039,6 +1047,10 @@ func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 	}
 	f, err := os.Open(abs)
 	if err != nil {
+		if remote := fallbackRemoteCarImageURL(d); remote != "" {
+			c.Redirect(http.StatusFound, remote)
+			return
+		}
 		if fallback := resolveStaticCarImage(d, rel); fallback != "" {
 			serveStaticAssetFile(c, fallback, attachment)
 			return
@@ -1059,6 +1071,22 @@ func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 		c.Header("Content-Length", fmt.Sprintf("%d", st.Size()))
 	}
 	_, _ = io.Copy(c.Writer, f)
+}
+
+func resolveRemoteImageURL(rel string) string {
+	rel = strings.TrimSpace(rel)
+	if strings.HasPrefix(rel, "http://") || strings.HasPrefix(rel, "https://") {
+		return rel
+	}
+	return ""
+}
+
+func fallbackRemoteCarImageURL(d Deps) string {
+	if d.FileService == nil || len(d.FileService.RemoteCarImages) == 0 {
+		return ""
+	}
+	idx := time.Now().UnixNano() % int64(len(d.FileService.RemoteCarImages))
+	return d.FileService.RemoteCarImages[idx]
 }
 
 func resolveStaticCarImage(d Deps, rel string) string {

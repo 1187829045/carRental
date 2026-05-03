@@ -10,9 +10,10 @@ import (
 )
 
 type FileService struct {
-	UploadRoot   string // absolute/relative root, e.g. "./upload"
-	ProjectRoot  string
-	StaticAssets []string
+	UploadRoot     string // absolute/relative root, e.g. "./upload"
+	ProjectRoot    string
+	StaticAssets   []string
+	RemoteCarImages []string
 }
 
 func NewFileService(projectRoot string) (*FileService, error) {
@@ -54,6 +55,11 @@ func NewFileService(projectRoot string) (*FileService, error) {
 			"src/main/webapp/static/images/cars/placeholder-1.svg",
 			"src/main/webapp/static/images/cars/placeholder-2.svg",
 			"src/main/webapp/static/images/cars/placeholder-3.svg",
+		},
+		RemoteCarImages: []string{
+			"https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200",
+			"https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=1200",
+			"https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=1200",
 		},
 	}, nil
 }
