@@ -198,6 +198,54 @@
             color: #6b7b94;
             font-size: 12px;
         }
+        .stats-toolbar{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .stats-filters{
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-group{
+            display: inline-flex;
+            padding: 4px;
+            background: #eef4ff;
+            border-radius: 999px;
+            border: 1px solid #dce9ff;
+        }
+        .filter-btn{
+            border: 0;
+            background: transparent;
+            color: #5f7392;
+            padding: 8px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .2s ease;
+        }
+        .filter-btn.is-active{
+            background: #2f80ff;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(47, 128, 255, 0.22);
+        }
+        .refresh-btn{
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 16px;
+            background: #13223a;
+            color: #fff;
+            cursor: pointer;
+        }
+        .stats-meta{
+            color: #6b7b94;
+            font-size: 12px;
+        }
         .stats-grid{
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -205,6 +253,23 @@
         }
         .stats-card{
             padding: 22px 20px;
+        }
+        .stats-card.featured{
+            background: linear-gradient(135deg, #f0fff8 0%, #e2fff3 100%);
+            border-color: rgba(52,195,143,0.25);
+            box-shadow: 0 16px 34px rgba(52,195,143,0.16);
+        }
+        .stats-card__badge{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(52,195,143,0.12);
+            color: #179167;
+            font-size: 12px;
+            font-weight: 600;
         }
         .stats-card__icon{
             width: 46px;
@@ -234,6 +299,11 @@
         .stats-card__desc{
             margin-top: 6px;
             color: #8a97ab;
+            font-size: 12px;
+        }
+        .stats-card__foot{
+            margin-top: 8px;
+            color: #6b7b94;
             font-size: 12px;
         }
         .content-grid{
@@ -467,30 +537,53 @@
         <h3>业务概览</h3>
         <span>关键数据一屏可见，帮助快速掌握系统运行情况</span>
     </div>
+    <div class="stats-toolbar">
+        <div class="stats-filters">
+            <div class="filter-group">
+                <button type="button" class="filter-btn" data-range="day">日</button>
+                <button type="button" class="filter-btn" data-range="week">周</button>
+                <button type="button" class="filter-btn is-active" data-range="month">月</button>
+            </div>
+            <button type="button" class="refresh-btn" id="refreshDashboardBtn">
+                <i class="layui-icon">&#xe669;</i>
+                <span>立即刷新</span>
+            </button>
+        </div>
+        <div class="stats-meta">
+            <span id="dashboardRangeHint">统计周期：本月</span>
+            <span style="display:inline-block;width:14px;"></span>
+            <span id="dashboardRefreshTime">更新时间：--</span>
+        </div>
+    </div>
     <div class="stats-grid">
         <div class="dashboard-card stats-card">
             <div class="stats-card__icon blue"><i class="layui-icon">&#xe770;</i></div>
-            <div class="stats-card__label">系统用户数</div>
-            <div class="stats-card__value" id="userCount">--</div>
-            <div class="stats-card__desc">包含系统管理与业务操作用户</div>
+            <div class="stats-card__label">在租车辆总数</div>
+            <div class="stats-card__value" id="inRentCarCount">--</div>
+            <div class="stats-card__desc">当前处于占用状态的车辆数量</div>
+            <div class="stats-card__foot" id="vehicleScopeText">统计口径：实时库存快照</div>
         </div>
-        <div class="dashboard-card stats-card">
+        <div class="dashboard-card stats-card featured">
+            <div class="stats-card__badge"><i class="layui-icon">&#xe756;</i><span>重点关注</span></div>
             <div class="stats-card__icon green"><i class="layui-icon">&#xe657;</i></div>
-            <div class="stats-card__label">车辆档案数</div>
-            <div class="stats-card__value" id="carCount">--</div>
-            <div class="stats-card__desc">用于反映当前车辆资源规模</div>
+            <div class="stats-card__label">闲置可租赁车辆数量</div>
+            <div class="stats-card__value" id="idleCarCount">--</div>
+            <div class="stats-card__desc">当前可立即投入出租的空闲车辆</div>
+            <div class="stats-card__foot">该指标单独突出显示，用于快速调度车辆资源</div>
         </div>
         <div class="dashboard-card stats-card">
             <div class="stats-card__icon orange"><i class="layui-icon">&#xe770;</i></div>
-            <div class="stats-card__label">客户数量</div>
-            <div class="stats-card__value" id="customerCount">--</div>
-            <div class="stats-card__desc">便于快速了解客户沉淀情况</div>
+            <div class="stats-card__label">出租订单数量</div>
+            <div class="stats-card__value" id="rentOrderCount">--</div>
+            <div class="stats-card__desc">统计周期内已完成或进行中的订单总量</div>
+            <div class="stats-card__foot">支持按日、周、月切换统计范围</div>
         </div>
         <div class="dashboard-card stats-card">
             <div class="stats-card__icon purple"><i class="layui-icon">&#xe63c;</i></div>
-            <div class="stats-card__label">出租订单数</div>
-            <div class="stats-card__value" id="rentCount">--</div>
-            <div class="stats-card__desc">当前累计出租订单统计</div>
+            <div class="stats-card__label">注册客户总量</div>
+            <div class="stats-card__value" id="customerCount">--</div>
+            <div class="stats-card__desc">统计周期内新增注册客户数量</div>
+            <div class="stats-card__foot" id="customerRangeText">当前按本月口径统计</div>
         </div>
     </div>
 
@@ -577,6 +670,8 @@
     var userName = '${user.realname}';
     var userType = Number('${user.type}');
     var roleLabel = userType === 1 ? '超级管理员' : '业务操作员';
+    var dashboardRange = 'month';
+    var dashboardTimer = null;
     var shortcutConfig = [
         {title: '车辆管理', desc: '快速维护车辆档案与状态', icon: '&#xe657;', url: '${yeqifu}/bus/toCarManager.action'},
         {title: '客户管理', desc: '查看和维护客户基础信息', icon: '&#xe770;', url: '${yeqifu}/bus/toCustomerManager.action'},
@@ -698,26 +793,86 @@
         $(id).text(formatCount(count));
     }
 
-    function loadOverview() {
-        $.when(
-            $.get('${yeqifu}/user/loadAllUser.action?page=1&limit=1'),
-            $.get('${yeqifu}/car/loadAllCar.action?page=1&limit=1'),
-            $.get('${yeqifu}/customer/loadAllCustomer.action?page=1&limit=1'),
-            $.get('${yeqifu}/rent/loadAllRent.action?page=1&limit=1'),
-            $.get('${yeqifu}/news/loadAllNews.action?page=1&limit=6'),
-            $.get('${yeqifu}/message/loadAllMessage.action?page=1&limit=6')
-        ).done(function(userResp, carResp, customerResp, rentResp, newsResp, messageResp) {
-            setCount('#userCount', userResp[0]);
-            setCount('#carCount', carResp[0]);
-            setCount('#customerCount', customerResp[0]);
-            setCount('#rentCount', rentResp[0]);
-            renderNews((newsResp[0].data || []).slice(0, 5));
-            renderMessages((messageResp[0].data || []).slice(0, 5));
+    function formatDateTime(value) {
+        if (!value) {
+            return '--';
+        }
+        var text = String(value);
+        if (text.indexOf('T') > -1) {
+            text = text.replace('T', ' ');
+        }
+        if (text.length >= 19) {
+            return text.substring(0, 19);
+        }
+        return text;
+    }
+
+    function loadDashboardMetrics(showToast) {
+        $.get('${yeqifu}/desk/loadDashboardMetrics.action', {range: dashboardRange}, function(resp) {
+            if (!resp || resp.code !== 0 || !resp.data) {
+                throw new Error((resp && resp.msg) || '首页指标加载失败');
+            }
+            var data = resp.data;
+            $('#inRentCarCount').text(formatCount(data.inRentCarCount));
+            $('#idleCarCount').text(formatCount(data.idleCarCount));
+            $('#rentOrderCount').text(formatCount(data.rentOrderCount));
+            $('#customerCount').text(formatCount(data.customerCount));
+            $('#dashboardRangeHint').text('统计周期：' + (data.rangeLabel || '--'));
+            $('#dashboardRefreshTime').text('更新时间：' + formatDateTime(data.refreshedAt));
+            $('#vehicleScopeText').text('统计口径：' + (data.vehicleScopeLabel || '实时库存快照'));
+            $('#customerRangeText').text('当前按' + (data.rangeLabel || '--') + '口径统计');
+            if (showToast) {
+                layer.msg('首页指标已刷新');
+            }
         }).fail(function() {
-            $('#userCount,#carCount,#customerCount,#rentCount').text('--');
+            $('#inRentCarCount,#idleCarCount,#rentOrderCount,#customerCount').text('--');
+            $('#dashboardRefreshTime').text('更新时间：刷新失败');
+            if (showToast) {
+                layer.msg('首页指标刷新失败，请稍后重试');
+            }
+        });
+    }
+
+    function loadNewsList() {
+        $.get('${yeqifu}/news/loadAllNews.action?page=1&limit=6').done(function(resp) {
+            renderNews((resp.data || []).slice(0, 5));
+        }).fail(function() {
             $('.hot_news').html('<tr><td class="empty-block" colspan="2">公告加载失败，请稍后刷新重试</td></tr>');
+        });
+    }
+
+    function loadMessageList() {
+        $.get('${yeqifu}/message/loadAllMessage.action?page=1&limit=6').done(function(resp) {
+            renderMessages((resp.data || []).slice(0, 5));
+        }).fail(function() {
             $('.hot_message').html('<tr><td class="empty-block" colspan="2">留言加载失败，请稍后刷新重试</td></tr>');
         });
+    }
+
+    function startDashboardRefresh() {
+        if (dashboardTimer) {
+            clearInterval(dashboardTimer);
+        }
+        dashboardTimer = setInterval(function() {
+            loadDashboardMetrics(false);
+        }, 60000);
+    }
+
+    function syncRangeButtons() {
+        $('.filter-btn').removeClass('is-active');
+        $('.filter-btn[data-range="' + dashboardRange + '"]').addClass('is-active');
+    }
+
+    function initDashboardMetrics() {
+        syncRangeButtons();
+        loadDashboardMetrics(false);
+        loadNewsList();
+        loadMessageList();
+        startDashboardRefresh();
+    }
+
+    function loadOverview() {
+        initDashboardMetrics();
     }
 
     layui.use(['layer', 'jquery'], function(){
@@ -733,6 +888,18 @@
         renderShortcutCards();
         renderRecommendCards();
         loadOverview();
+        $('#refreshDashboardBtn').on('click', function() {
+            loadDashboardMetrics(true);
+        });
+        $('body').on('click', '.filter-btn', function() {
+            var nextRange = $(this).data('range');
+            if (!nextRange || nextRange === dashboardRange) {
+                return;
+            }
+            dashboardRange = nextRange;
+            syncRangeButtons();
+            loadDashboardMetrics(false);
+        });
 
         $('body').on('click', '.js-open-tab', function() {
             openTab($(this).data('title'), $(this).data('url'), $(this).data('icon'));

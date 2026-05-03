@@ -302,6 +302,18 @@ func NewRouter(d Deps) *gin.Engine {
 		}
 		renderViewWithUser(c, d.Cfg, "system/main/deskManager", u, nil)
 	})
+	authed.GET("/desk/loadDashboardMetrics.action", func(c *gin.Context) {
+		if d.StatService == nil || d.StatService.DB == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "统计服务未初始化"})
+			return
+		}
+		data, err := d.StatService.LoadDashboardMetrics(c.Request.Context(), c.DefaultQuery("range", "month"))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "首页指标加载失败"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "", "data": data})
+	})
 
 	// Sys page routes
 	authed.GET("/sys/toChangePassword.action", pageWithUser(d.Cfg, "system/user/changePassword"))

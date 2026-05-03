@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	"carRental/internal/model"
 
@@ -15,6 +17,51 @@ import (
 type StatService struct {
 	DB         *sql.DB
 	BusService *BusService
+}
+
+func (s *StatService) LoadDashboardMetrics(ctx context.Context, rangeType string) (*model.DashboardMetrics, error) {
+	start, end, rangeKey, rangeLabel := resolveDashboardRange(time.Now(), rangeType)
+	metrics := &model.DashboardMetrics{
+		Range:             rangeKey,
+		RangeLabel:        rangeLabel,
+		RangeStart:        start,
+		RangeEnd:          end,
+		RefreshedAt:       time.Now(),
+		VehicleScopeLabel: "实时库存快照",
+	}
+
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_car WHERE COALESCE(isrenting, 0) <> 0`).Scan(&metrics.InRentCarCount); err != nil {
+		return nil, err
+	}
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_car WHERE COALESCE(isrenting, 0) = 0`).Scan(&metrics.IdleCarCount); err != nil {
+		return nil, err
+	}
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_rent WHERE createtime >= ? AND createtime < ?`, start, end).Scan(&metrics.RentOrderCount); err != nil {
+		return nil, err
+	}
+	if err := s.DB.QueryRowContext(ctx, `SELECT COUNT(1) FROM bus_customer WHERE createtime >= ? AND createtime < ?`, start, end).Scan(&metrics.CustomerCount); err != nil {
+		return nil, err
+	}
+	return metrics, nil
+}
+
+func resolveDashboardRange(now time.Time, raw string) (time.Time, time.Time, string, string) {
+	raw = strings.ToLower(strings.TrimSpace(raw))
+	switch raw {
+	case "day":
+		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		return start, start.AddDate(0, 0, 1), "day", "今日"
+	case "week":
+		weekday := int(now.Weekday())
+		if weekday == 0 {
+			weekday = 7
+		}
+		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -(weekday - 1))
+		return start, start.AddDate(0, 0, 7), "week", "本周"
+	default:
+		start := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		return start, start.AddDate(0, 1, 0), "month", "本月"
+	}
 }
 
 func (s *StatService) LoadCustomerAreaStat(ctx context.Context) ([]model.BaseEntity, error) {
