@@ -5,6 +5,7 @@
   Time: 18:50
   To change this template use File | Settings | File Templates.
 --%>
+<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -20,6 +21,24 @@
     <%--<link rel="icon" href="favicon.ico">--%>
     <link rel="stylesheet" href="${yeqifu}/static/layui/css/layui.css" media="all"/>
     <link rel="stylesheet" href="${yeqifu}/static/css/public.css" media="all"/>
+    <style>
+        .car-edit-layer.layui-layer-page{
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            margin: 0 !important;
+            transform: translate(-50%, -50%) !important;
+            transform-origin: center center !important;
+        }
+        .car-edit-layer .layui-layer-content{
+            overflow: visible !important;
+        }
+        .car-edit-layer,
+        .car-edit-layer *{
+            transition: none !important;
+            animation: none !important;
+        }
+    </style>
 </head>
 <body class="childrenBody">
 
@@ -294,21 +313,81 @@
 
         var url;
         var mainIndex;
-    var defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200";
+        var defaultCarImage = "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1200";
+        var lastLayerOpenAt = 0;
 
-    function buildCarImageUrl(path) {
-        var finalPath = path || defaultCarImage;
-        return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
-    }
+        function buildCarImageUrl(path) {
+            var finalPath = path || defaultCarImage;
+            return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+        }
+
+        function debounce(fn, wait) {
+            var timer = null;
+            return function () {
+                var context = this;
+                var args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    fn.apply(context, args);
+                }, wait);
+            };
+        }
+
+        var syncEditLayerPosition = debounce(function () {
+            var $layer = $(".car-edit-layer");
+            if (!$layer.length) {
+                return;
+            }
+            $layer.css({
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                margin: 0,
+                transform: "translate(-50%, -50%)",
+                "transform-origin": "center center"
+            });
+        }, 30);
+
+        function openStableEditLayer(options) {
+            var now = Date.now();
+            if (now - lastLayerOpenAt < 180) {
+                return;
+            }
+            lastLayerOpenAt = now;
+            if (mainIndex) {
+                layer.close(mainIndex);
+            }
+            mainIndex = layer.open($.extend(true, {
+                type: 1,
+                area: ['780px', '510px'],
+                fixed: true,
+                resize: false,
+                move: false,
+                moveOut: false,
+                shadeClose: false,
+                offset: 'auto',
+                skin: 'car-edit-layer',
+                end: function () {
+                    $(window).off('resize.carEditLayer');
+                },
+                success: function (layero, index) {
+                    syncEditLayerPosition();
+                    $(window).off('resize.carEditLayer').on('resize.carEditLayer', function () {
+                        syncEditLayerPosition();
+                    });
+                    if (typeof options.success === "function") {
+                        options.success(layero, index);
+                    }
+                }
+            }, options));
+        }
 
         //打开添加页面
         function openAddCar() {
-            mainIndex = layer.open({
-                type: 1,
+            openStableEditLayer({
                 title: '添加车辆',
                 content: $("#saveOrUpdateDiv"),
-                area: ['780px', '510px'],
-                success: function (index) {
+                success: function (layero, index) {
                     //清空表单数据
                     $("#dataFrm")[0].reset();
                     //设置默认图片
@@ -322,12 +401,10 @@
 
         //打开修改页面
         function openUpdateCar(data) {
-            mainIndex = layer.open({
-                type: 1,
+            openStableEditLayer({
                 title: '修改车辆',
                 content: $("#saveOrUpdateDiv"),
-                area: ['780px', '510px'],
-                success: function (index) {
+                success: function (layero, index) {
                     form.val("dataFrm", data);
                     $("#showCarImg").attr("src", buildCarImageUrl(data.carimg));
                     url = "${yeqifu}/car/updateCar.action";

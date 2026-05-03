@@ -5,6 +5,7 @@
   Time: 18:50
   To change this template use File | Settings | File Templates.
 --%>
+<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -76,9 +77,9 @@
                 </div>
             </div>
             <div class="layui-inline">
-                <label class="layui-form-label">还车时间:</label>
+                <label class="layui-form-label">预计还车时间:</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="returndate" id="returndate" lay-verify="required" placeholder="请输入还车时间" class="layui-input">
+                    <input type="text" name="returndate" id="returndate" lay-verify="required" placeholder="请输入预计还车时间" class="layui-input">
                 </div>
             </div>
         </div>
@@ -86,14 +87,14 @@
             <div class="layui-inline">
                 <label class="layui-form-label">身份证号:</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="identity" lay-verify="required" readonly="readonly" placeholder="请输入身份证号"
+                    <input type="text" name="identity" id="rentIdentity" lay-verify="required" placeholder="请输入身份证号"
                            class="layui-input">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">客户名称:</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="opername" id="opername" lay-verify="required" placeholder="请输入操作员" readonly="readonly" class="layui-input">
+                    <input type="text" name="opername" id="opername" lay-verify="required" placeholder="请输入客户名称" class="layui-input">
                 </div>
             </div>
 
@@ -141,6 +142,7 @@
         var table = layui.table;
         var dtree = layui.dtree;
         var laydate = layui.laydate;
+        var currentSelectedCar = null;
 
         laydate.render({
             elem:'#begindate',
@@ -156,6 +158,54 @@
         function buildCarImageUrl(path) {
             var finalPath = path || defaultCarImage;
             return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+        }
+
+        function setRentFormCarData(car) {
+            if (!car) {
+                return;
+            }
+            $("input[name='carnumber']").val(car.carnumber || "");
+            $("input[name='price']").val(car.rentprice || "");
+        }
+
+        function applyRentFormData(data, selectedCar) {
+            var merged = $.extend({}, data || {});
+            if (selectedCar) {
+                merged.carnumber = selectedCar.carnumber || "";
+                merged.price = selectedCar.rentprice || "";
+            }
+            form.val("dataFrm", merged);
+        }
+
+        function fillRentCustomer(identity, selectedCar, silent) {
+            var normalized = normalizeIdentity(identity);
+            $("#rentIdentity").val(normalized);
+            setRentFormCarData(selectedCar);
+            if (!normalized) {
+                $("#opername").val("");
+                return;
+            }
+            if (!isValidIdentity(normalized)) {
+                if (!silent) {
+                    layer.msg("请输入正确的身份证号");
+                }
+                $("#opername").val("");
+                return;
+            }
+            $.get("${yeqifu}/rent/initRentFrom.action", {
+                identity: normalized,
+                price: selectedCar ? selectedCar.rentprice : "",
+                carnumber: selectedCar ? selectedCar.carnumber : ""
+            }, function (obj) {
+                if (!obj || !obj.rentid) {
+                    $("#opername").val("");
+                    if (!silent) {
+                        layer.msg("未找到对应客户信息");
+                    }
+                    return;
+                }
+                applyRentFormData(obj, selectedCar);
+            });
         }
 
         function normalizeIdentity(value) {
@@ -242,6 +292,7 @@
 
         //打开添加页面
         function openRentCar(data) {
+            currentSelectedCar = data;
             mainIndex = layer.open({
                 type: 1,
                 title: '添加汽车出租',
@@ -250,22 +301,18 @@
                 success: function (index) {
                     //清空表单数据
                     $("#dataFrm")[0].reset();
-                    //请求数据,分别拿到出租价格，身份证号，车牌号
-                    var price=data.rentprice;
-                    var identity=normalizeIdentity($("#identity").val());
-                    $("#identity").val(identity);
-                    var carnumber=data.carnumber;
-                    $.get("${yeqifu}/rent/initRentFrom.action",{
-                        identity:identity,
-                        price:price,
-                        carnumber:carnumber
-                    },function (obj) {
-                        //赋值
-                        form.val("dataFrm",obj);
-                    })
+                    setRentFormCarData(data);
+                    fillRentCustomer($("#identity").val(), data, true);
                 }
             });
         }
+
+        $("#rentIdentity").on("input blur", function () {
+            if (!currentSelectedCar) {
+                return;
+            }
+            fillRentCustomer($(this).val(), currentSelectedCar, true);
+        });
 
         //保存
         form.on("submit(doSubmit)", function (obj) {

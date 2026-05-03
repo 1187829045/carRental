@@ -611,9 +611,10 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			c.JSON(http.StatusOK, gin.H{})
 			return
 		}
+		x.Price = floatParam(c, "price")
+		x.CarNumber = strings.TrimSpace(c.Query("carnumber"))
 		if u, ok := getSessionUser(c); ok {
 			x.OperId = u.UserID
-			x.OperName = u.RealName
 		}
 		c.JSON(http.StatusOK, x)
 	})
@@ -623,6 +624,11 @@ func registerBusRoutes(rg *gin.RouterGroup, d Deps) {
 			operid = u.UserID
 		}
 		identity := service.NormalizeIdentity(c.PostForm("identity"))
+		customer, err := d.BusService.GetCustomer(c.Request.Context(), identity)
+		if err != nil || customer == nil {
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "客户不存在，请先确认身份证号"})
+			return
+		}
 		rt := model.Rent{
 			RentID:     c.PostForm("rentid"),
 			Price:      floatParam(c, "price"),
