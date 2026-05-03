@@ -207,19 +207,23 @@ func NewRouter(d Deps) *gin.Engine {
 	// Login flow
 	root.GET("/login/toLogin.action", func(c *gin.Context) {
 		renderView(c, d.Cfg, "system/main/login", map[string]any{
-			"error": "",
+			"error":     "",
+			"errorType": "",
+			"loginname": "",
 		})
 	})
 	root.POST("/login/login.action", func(c *gin.Context) {
-		loginName := c.PostForm("loginname")
+		loginName := strings.TrimSpace(c.PostForm("loginname"))
 		pwd := c.PostForm("pwd")
-		code := c.PostForm("code")
+		code := strings.TrimSpace(c.PostForm("code"))
 
 		sess := sessions.Default(c)
 		want, _ := sess.Get("code").(string)
 		if want == "" || code != want {
 			renderView(c, d.Cfg, "system/main/login", map[string]any{
-				"error": "验证码错误",
+				"error":     "验证码错误，请重新输入",
+				"errorType": "captcha",
+				"loginname": loginName,
 			})
 			return
 		}
@@ -231,7 +235,9 @@ func NewRouter(d Deps) *gin.Engine {
 		}
 		if u == nil {
 			renderView(c, d.Cfg, "system/main/login", map[string]any{
-				"error": "用户名或密码错误",
+				"error":     "密码错误，请检查后重试",
+				"errorType": "password",
+				"loginname": loginName,
 			})
 			return
 		}

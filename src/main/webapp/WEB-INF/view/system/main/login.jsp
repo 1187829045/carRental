@@ -20,16 +20,82 @@
     <link rel="icon" href="${yeqifu}/static/favicon.ico">
     <link rel="stylesheet" href="${yeqifu}/static/layui/css/layui.css" media="all" />
     <link rel="stylesheet" href="${yeqifu}/static/css/public.css" media="all" />
+    <style>
+        .login-error-banner{
+            display: none;
+            margin: 0 0 14px;
+            padding: 12px 14px;
+            border: 1px solid #ffb3b3;
+            border-radius: 10px;
+            background: #fff1f0;
+            color: #cf1322;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 6px 16px rgba(207,19,34,0.12);
+        }
+        .login-error-banner.is-visible{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .login-error-banner .layui-icon{
+            font-size: 18px;
+        }
+        .login-error-state .layui-input{
+            border-color: #ff4d4f !important;
+            box-shadow: 0 0 0 3px rgba(255,77,79,0.12);
+        }
+        .captcha-flash{
+            animation: loginFlash 0.7s ease-in-out 2;
+        }
+        .field-shake{
+            animation: loginShake 0.42s ease-in-out 2;
+        }
+        @keyframes loginShake{
+            0%,100%{transform:translateX(0);}
+            20%{transform:translateX(-6px);}
+            40%{transform:translateX(6px);}
+            60%{transform:translateX(-4px);}
+            80%{transform:translateX(4px);}
+        }
+        @keyframes loginFlash{
+            0%,100%{opacity:1; transform:scale(1);}
+            50%{opacity:.35; transform:scale(1.06);}
+        }
+        .sr-live-region{
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        @media (max-width: 768px){
+            .login-error-banner{
+                margin-bottom: 12px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
 </head>
 <body class="loginBody">
-<form class="layui-form" id="loginFrm" method="post" action="${yeqifu}/login/login.action">
+<form class="layui-form" id="loginFrm" method="post" action="${yeqifu}/login/login.action" data-error-type="${errorType}" data-error-message="${error}">
     <div class="login-brand-title">汽车租赁系统</div>
     <div class="login_face"><img src="${yeqifu}/static/images/face.jpg" class="userAvatar"></div>
-    <div class="layui-form-item input-item">
-        <label for="loginname">用户名</label>
-        <input type="text" placeholder="请输入用户名" autocomplete="off" name="loginname" id="loginname" class="layui-input" lay-verify="required">
+    <div id="loginAriaLive" class="sr-live-region" aria-live="assertive" aria-atomic="true"></div>
+    <div id="loginErrorBanner" class="login-error-banner" role="alert" aria-live="assertive" aria-atomic="true">
+        <i class="layui-icon layui-icon-close-fill" aria-hidden="true"></i>
+        <span id="loginErrorText"></span>
     </div>
     <div class="layui-form-item input-item">
+        <label for="loginname">用户名</label>
+        <input type="text" placeholder="请输入用户名" autocomplete="off" name="loginname" id="loginname" value="${loginname}" class="layui-input" lay-verify="required">
+    </div>
+    <div class="layui-form-item input-item" id="pwdField">
         <label for="pwd">密码</label>
         <input type="password" placeholder="请输入密码" autocomplete="off" name="pwd" id="pwd" class="layui-input" lay-verify="required">
     </div>
@@ -40,9 +106,6 @@
     </div>
     <div class="layui-form-item">
         <button class="layui-btn layui-block" id="loginBtn" lay-filter="login" lay-submit>登录</button>
-    </div>
-    <div class="layui-form-item layui-row" style="text-align: center;color: red;">
-        ${error}
     </div>
 </form>
 <script type="text/javascript" src="${yeqifu}/static/layui/layui.js"></script>
@@ -59,7 +122,51 @@
             });
         })*/
 
+        function showBanner(message){
+            $('#loginErrorText').text(message || '');
+            $('#loginErrorBanner').addClass('is-visible');
+            $('#loginAriaLive').text(message || '');
+        }
+
+        function clearErrorState(){
+            $('#loginErrorBanner').removeClass('is-visible');
+            $('#loginAriaLive').text('');
+            $('#pwdField, #imgCode').removeClass('login-error-state field-shake');
+            $('#captchaImg').removeClass('captcha-flash');
+            $('#pwd').removeAttr('aria-invalid');
+            $('#code').removeAttr('aria-invalid');
+        }
+
+        function triggerCaptchaError(message){
+            showBanner(message);
+            $('#imgCode').addClass('login-error-state field-shake');
+            $('#captchaImg').addClass('captcha-flash');
+            $('#captchaImg').attr('src', '${yeqifu}/login/getCode.action?ts=' + Date.now());
+            $('#code').val('').attr('aria-invalid', 'true').trigger('focus');
+            setTimeout(function(){
+                $('#imgCode').removeClass('field-shake');
+                $('#captchaImg').removeClass('captcha-flash');
+            }, 900);
+        }
+
+        function triggerPasswordError(message){
+            $('#loginAriaLive').text(message || '');
+            $('#pwdField').addClass('login-error-state');
+            $('#pwd').attr('aria-invalid', 'true');
+            layer.alert(message, {
+                title: '登录失败',
+                icon: 2,
+                shadeClose: false,
+                closeBtn: 0,
+                anim: 6
+            }, function(index){
+                layer.close(index);
+                $('#pwd').trigger('focus');
+            });
+        }
+
         form.on('submit(login)', function(){
+            clearErrorState();
             var btn = $('#loginBtn');
             btn.text('登录中...').attr('disabled','disabled').addClass('layui-disabled');
             setTimeout(function(){
@@ -83,6 +190,22 @@
                 $(this).parent().removeClass("layui-input-active");
             }
         })
+        $("#pwd").on("input", function(){
+            $('#pwdField').removeClass('login-error-state');
+            $(this).removeAttr('aria-invalid');
+        });
+        $("#code").on("input", function(){
+            $('#imgCode').removeClass('login-error-state');
+            $(this).removeAttr('aria-invalid');
+        });
+
+        var errorType = $('#loginFrm').data('error-type') || '';
+        var errorMessage = $('#loginFrm').data('error-message') || '';
+        if(errorType === 'captcha' && errorMessage){
+            triggerCaptchaError(errorMessage);
+        }else if(errorType === 'password' && errorMessage){
+            triggerPasswordError(errorMessage);
+        }
     })
 
 </script>
