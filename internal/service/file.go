@@ -10,7 +10,9 @@ import (
 )
 
 type FileService struct {
-	UploadRoot string // absolute/relative root, e.g. "./upload"
+	UploadRoot   string // absolute/relative root, e.g. "./upload"
+	ProjectRoot  string
+	StaticAssets []string
 }
 
 func NewFileService(projectRoot string) (*FileService, error) {
@@ -45,7 +47,15 @@ func NewFileService(projectRoot string) (*FileService, error) {
 	if root == "" || looksLikeWindowsDrive(root) {
 		root = filepath.Join(projectRoot, "upload")
 	}
-	return &FileService{UploadRoot: root}, nil
+	return &FileService{
+		UploadRoot:  root,
+		ProjectRoot: projectRoot,
+		StaticAssets: []string{
+			"src/main/webapp/static/images/cars/placeholder-1.svg",
+			"src/main/webapp/static/images/cars/placeholder-2.svg",
+			"src/main/webapp/static/images/cars/placeholder-3.svg",
+		},
+	}, nil
 }
 
 func looksLikeWindowsDrive(p string) bool {

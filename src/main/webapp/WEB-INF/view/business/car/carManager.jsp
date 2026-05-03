@@ -231,7 +231,7 @@
                 , {field: 'description', title: '车辆描述', align: 'center', width: '150'}
                 , {
                     field: 'carimg', title: '缩略图', align: 'center', width: '80', templet: function (d) {
-                        return "<img width=40 height=40 src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + "/>";
+                        return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + " onerror=\"this.onerror=null;this.src='${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg';\"/>";
                     }
                 }
                 , {field: 'createtime', title: '录入时间', align: 'center', width: '165'}
@@ -306,8 +306,8 @@
                     //清空表单数据
                     $("#dataFrm")[0].reset();
                     //设置默认图片
-                    $("#showCarImg").attr("src", "${yeqifu}/file/downloadShowFile.action?path=images/defaultcarimage.jpg");
-                    $("#carimg").val("images/defaultcarimage.jpg");
+                    $("#showCarImg").attr("src", "${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg");
+                    $("#carimg").val("static/images/cars/placeholder-1.svg");
                     url = "${yeqifu}/car/addCar.action";
                     $("#carnumber").removeAttr("readonly","readonly");
                 }
@@ -398,4 +398,3 @@
 </script>
 </body>
 </html>
-

@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	defaultCarImage = "images/defaultcarimage.jpg"
+	defaultCarImage = "static/images/cars/placeholder-1.svg"
 	uploadTempTag   = "_temp"
 )
 
@@ -1030,11 +1030,19 @@ func newUploadName(old string, temp bool) string {
 func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 	abs, err := service.SafeJoin(d.FileService.UploadRoot, rel)
 	if err != nil {
+		if fallback := resolveStaticCarImage(d, rel); fallback != "" {
+			serveStaticAssetFile(c, fallback, attachment)
+			return
+		}
 		c.String(http.StatusBadRequest, "文件不存在")
 		return
 	}
 	f, err := os.Open(abs)
 	if err != nil {
+		if fallback := resolveStaticCarImage(d, rel); fallback != "" {
+			serveStaticAssetFile(c, fallback, attachment)
+			return
+		}
 		c.String(http.StatusNotFound, "文件不存在")
 		return
 	}
@@ -1043,6 +1051,59 @@ func serveUploadedFile(c *gin.Context, d Deps, rel string, attachment bool) {
 	if attachment {
 		name := filepath.Base(abs)
 		setAttachmentFilename(c, name)
+	}
+	if ct := mime.TypeByExtension(filepath.Ext(abs)); ct != "" {
+		c.Header("Content-Type", ct)
+	}
+	if st != nil {
+		c.Header("Content-Length", fmt.Sprintf("%d", st.Size()))
+	}
+	_, _ = io.Copy(c.Writer, f)
+}
+
+func resolveStaticCarImage(d Deps, rel string) string {
+	rel = strings.TrimSpace(rel)
+	if d.FileService == nil || d.FileService.ProjectRoot == "" {
+		return ""
+	}
+	if isStaticAssetPath(rel) {
+		asset := filepath.Join(d.FileService.ProjectRoot, filepath.FromSlash(rel))
+		if st, err := os.Stat(asset); err == nil && !st.IsDir() {
+			return asset
+		}
+	}
+	if len(d.FileService.StaticAssets) == 0 {
+		return ""
+	}
+	idx := time.Now().UnixNano() % int64(len(d.FileService.StaticAssets))
+	asset := filepath.Join(d.FileService.ProjectRoot, filepath.FromSlash(d.FileService.StaticAssets[idx]))
+	if st, err := os.Stat(asset); err == nil && !st.IsDir() {
+		return asset
+	}
+	for _, item := range d.FileService.StaticAssets {
+		asset = filepath.Join(d.FileService.ProjectRoot, filepath.FromSlash(item))
+		if st, err := os.Stat(asset); err == nil && !st.IsDir() {
+			return asset
+		}
+	}
+	return ""
+}
+
+func isStaticAssetPath(rel string) bool {
+	rel = strings.ReplaceAll(rel, "\\", "/")
+	return strings.HasPrefix(rel, "static/") || strings.HasPrefix(rel, "images/")
+}
+
+func serveStaticAssetFile(c *gin.Context, abs string, attachment bool) {
+	f, err := os.Open(abs)
+	if err != nil {
+		c.String(http.StatusNotFound, "文件不存在")
+		return
+	}
+	defer f.Close()
+	st, _ := f.Stat()
+	if attachment {
+		setAttachmentFilename(c, filepath.Base(abs))
 	}
 	if ct := mime.TypeByExtension(filepath.Ext(abs)); ct != "" {
 		c.Header("Content-Type", ct)

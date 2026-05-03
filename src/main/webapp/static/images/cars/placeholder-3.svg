@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="car placeholder orange">
+<rect width="320" height="200" rx="24" fill="#fff7ef"/>
+<rect x="26" y="22" width="268" height="156" rx="20" fill="#ffe7cf"/>
+<path d="M80 120h160c11 0 20-9 20-19v-5c0-4-1-8-3-11l-14-23c-4-8-13-13-22-13h-76c-9 0-17 5-22 13L83 85c-2 3-3 7-3 11v5c0 10 9 19 20 19z" fill="#ff9f43"/>
+<path d="M117 62h86c8 0 14 4 17 10l8 15H94l8-15c3-6 9-10 15-10z" fill="#ffd1a1"/>
+<circle cx="116" cy="125" r="20" fill="#4a3f35"/>
+<circle cx="116" cy="125" r="10" fill="#fffaf5"/>
+<circle cx="224" cy="125" r="20" fill="#4a3f35"/>
+<circle cx="224" cy="125" r="10" fill="#fffaf5"/>
+<rect x="106" y="92" width="47" height="18" rx="6" fill="#fffaf5"/>
+<rect x="167" y="92" width="47" height="18" rx="6" fill="#fffaf5"/>
+<rect x="82" y="109" width="22" height="8" rx="4" fill="#7cc8ff"/>
+<rect x="216" y="109" width="22" height="8" rx="4" fill="#7cc8ff"/>
+<text x="160" y="164" text-anchor="middle" font-size="18" font-family="Arial, sans-serif" fill="#9a6b35">Auto Preview</text>
+</svg>

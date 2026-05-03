@@ -182,7 +182,7 @@
                     , {field: 'description', title: '出租描述', align: 'center', width: '160'}
                     , {
                         field: 'carimg', title: '缩略图', align: 'center', width: '80', templet: function (d) {
-                            return "<img width=40 height=40 src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + "/>";
+                            return "<img width=40 height=40 style='object-fit:cover;border-radius:6px;' src=${yeqifu}/file/downloadShowFile.action?path=" + d.carimg + " onerror=\"this.onerror=null;this.src='${yeqifu}/file/downloadShowFile.action?path=static/images/cars/placeholder-1.svg';\"/>";
                         }
                     }
                     , {field: 'createtime', title: '录入时间', align: 'center', width: '170'}

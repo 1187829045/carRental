@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="car placeholder green">
+<rect width="320" height="200" rx="24" fill="#effff7"/>
+<rect x="24" y="22" width="272" height="156" rx="20" fill="#d7f7ea"/>
+<path d="M79 121h162c11 0 19-9 19-19v-6c0-3-1-7-3-10l-12-24c-5-8-13-12-22-12h-80c-9 0-17 4-22 12L82 86c-2 3-3 7-3 10v6c0 10 8 19 19 19z" fill="#34c38f"/>
+<path d="M116 63h88c7 0 14 4 17 11l7 14H93l7-14c3-7 10-11 16-11z" fill="#8ee1be"/>
+<circle cx="116" cy="126" r="20" fill="#204b57"/>
+<circle cx="116" cy="126" r="10" fill="#f6fffb"/>
+<circle cx="224" cy="126" r="20" fill="#204b57"/>
+<circle cx="224" cy="126" r="10" fill="#f6fffb"/>
+<rect x="104" y="92" width="50" height="18" rx="6" fill="#f6fffb"/>
+<rect x="162" y="92" width="50" height="18" rx="6" fill="#f6fffb"/>
+<rect x="82" y="110" width="22" height="8" rx="4" fill="#ffe08a"/>
+<rect x="216" y="110" width="22" height="8" rx="4" fill="#ffe08a"/>
+<text x="160" y="164" text-anchor="middle" font-size="18" font-family="Arial, sans-serif" fill="#4d7f69">Vehicle Image</text>
+</svg>
