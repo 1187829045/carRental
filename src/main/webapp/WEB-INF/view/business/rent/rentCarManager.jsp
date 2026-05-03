@@ -21,37 +21,190 @@
     <%--<link rel="icon" href="favicon.ico">--%>
     <link rel="stylesheet" href="${yeqifu}/static/layui/css/layui.css" media="all"/>
     <link rel="stylesheet" href="${yeqifu}/static/css/public.css" media="all"/>
+    <style>
+        .rent-page-card{
+            background: #fff;
+            border: 1px solid rgba(47, 128, 255, 0.10);
+            border-radius: 18px;
+            box-shadow: 0 18px 38px rgba(15, 23, 42, 0.06);
+            padding: 18px 20px;
+            margin-bottom: 18px;
+        }
+        .rent-page-card .layui-field-title{
+            margin-top: 0 !important;
+            margin-bottom: 12px;
+        }
+        .rent-page-card .layui-field-title legend{
+            font-size: 18px;
+            font-weight: 700;
+            color: #13223a;
+        }
+        .rent-search-row{
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .rent-search-field{
+            min-width: 280px;
+            flex: 1 1 320px;
+        }
+        .rent-field-label{
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5f7392;
+        }
+        .rent-page-card .layui-input,
+        .rent-page-card .layui-textarea{
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid #d9e7ff;
+            background: #fbfdff;
+            padding-left: 14px;
+        }
+        .rent-page-card .layui-input:focus,
+        .rent-page-card .layui-textarea:focus{
+            border-color: rgba(47, 128, 255, 0.65) !important;
+            box-shadow: 0 0 0 4px rgba(47, 128, 255, 0.12);
+            background: #fff;
+        }
+        .rent-action-group{
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .rent-table-card{
+            background: #fff;
+            border: 1px solid rgba(47, 128, 255, 0.10);
+            border-radius: 18px;
+            box-shadow: 0 18px 38px rgba(15, 23, 42, 0.06);
+            padding: 16px;
+        }
+        .rent-table-card__head{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .rent-table-card__title{
+            font-size: 18px;
+            font-weight: 700;
+            color: #13223a;
+        }
+        .rent-table-card__desc{
+            font-size: 12px;
+            color: #6b7b94;
+        }
+        .rent-form-grid{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px 16px;
+        }
+        .rent-form-grid .layui-form-item{
+            margin-bottom: 0;
+        }
+        .rent-form-grid .layui-input-inline,
+        .rent-form-grid .layui-input-block{
+            width: 100%;
+            margin-left: 0;
+        }
+        .rent-form-grid .layui-form-label{
+            width: auto;
+            padding: 0 0 8px;
+            line-height: 1.2;
+            float: none;
+            font-weight: 600;
+            color: #5f7392;
+        }
+        .rent-form-grid .layui-inline{
+            width: 100%;
+            margin-right: 0;
+        }
+        .rent-form-grid .layui-input-block{
+            min-height: auto;
+        }
+        .rent-form-grid .layui-form-item.is-full{
+            grid-column: 1 / -1;
+        }
+        .rent-submit-row{
+            text-align: center;
+            padding-top: 10px;
+        }
+        .rent-loading-tip{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7b94;
+            font-size: 12px;
+        }
+        .rent-loading-tip i{
+            color: #2f80ff;
+        }
+        @media screen and (max-width: 768px){
+            .rent-page-card,
+            .rent-table-card{
+                padding: 14px;
+                border-radius: 16px;
+            }
+            .rent-search-field{
+                min-width: 100%;
+                flex-basis: 100%;
+            }
+            .rent-form-grid{
+                grid-template-columns: 1fr;
+            }
+            #view_carimg{
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
 </head>
 <body class="childrenBody">
 
 <!-- 搜索条件开始 -->
-<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-    <legend>查询条件</legend>
-</fieldset>
-
-<form class="layui-form" method="post" id="searchFrm">
-    <div class="layui-form-item">
-        <div class="layui-inline">
-            <label class="layui-form-label">身份证号:</label>
-            <div class="layui-input-inline" style="padding: 5px">
+<div class="rent-page-card">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>查询条件</legend>
+    </fieldset>
+    <form class="layui-form" method="post" id="searchFrm">
+        <div class="rent-search-row">
+            <div class="rent-search-field">
+                <label class="rent-field-label">身份证号</label>
                 <input type="text" name="identity" id="identity" autocomplete="off"
-                       class="layui-input layui-input-inline"
-                       placeholder="请输入身份证号" style="height: 30px;border-radius: 10px">
+                       class="layui-input"
+                       placeholder="请输入身份证号后查询可租车辆">
             </div>
-            <button type="button"
-                    class="layui-btn layui-btn-normal layui-icon layui-icon-search layui-btn-radius layui-btn-sm"
-                    id="doSearch" style="margin-top: 4px">查询
-            </button>
-            <button type="reset"
-                    class="layui-btn layui-btn-warm layui-icon layui-icon-refresh layui-btn-radius layui-btn-sm"
-                    style="margin-top: 4px">重置
-            </button>
+            <div class="rent-action-group">
+                <button type="button"
+                        class="layui-btn layui-btn-normal layui-icon layui-icon-search layui-btn-radius"
+                        id="doSearch">查询
+                </button>
+                <button type="reset"
+                        class="layui-btn layui-btn-warm layui-icon layui-icon-refresh layui-btn-radius"
+                        id="resetSearchBtn">重置
+                </button>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <!-- 数据表格开始 -->
-<div id="content" style="display: none;">
+<div id="content" class="rent-table-card" style="display: none;">
+    <div class="rent-table-card__head">
+        <div>
+            <div class="rent-table-card__title">可租车辆列表</div>
+            <div class="rent-table-card__desc">默认每页展示 20 条数据，支持切换到 25 / 30 条，按更新时间倒序展示</div>
+        </div>
+        <div class="rent-loading-tip" id="tableLoadingHint">
+            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i>
+            <span>等待查询</span>
+        </div>
+    </div>
     <table id="carTable" lay-filter="carTable"></table>
     <div id="carBar" style="display: none;">
         <a class="layui-btn layui-btn-warm layui-btn-xs layui-btn-radius" lay-event="rentCar">租赁汽车</a>
@@ -62,8 +215,9 @@
 <%--添加和修改的弹出层开始--%>
 <div style="display: none;padding: 20px;" id="saveOrUpdateDiv">
     <form class="layui-form" lay-filter="dataFrm" id="dataFrm">
-        <div class="layui-form-item">
-            <label class="layui-form-label">出租单号:</label>
+        <div class="rent-form-grid">
+        <div class="layui-form-item is-full">
+            <label class="layui-form-label">出租单号</label>
             <div class="layui-input-block">
                 <input type="text" name="rentid" lay-verify="required" readonly="readonly" placeholder="请输入出租单号"
                        class="layui-input">
@@ -71,13 +225,15 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">起租时间:</label>
+                <label class="layui-form-label">起租时间</label>
                 <div class="layui-input-inline">
                     <input type="text" name="begindate" id="begindate" lay-verify="required" placeholder="请输入起租时间" class="layui-input">
                 </div>
             </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">预计还车时间:</label>
+                <label class="layui-form-label">预计还车时间</label>
                 <div class="layui-input-inline">
                     <input type="text" name="returndate" id="returndate" lay-verify="required" placeholder="请输入预计还车时间" class="layui-input">
                 </div>
@@ -85,36 +241,39 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">身份证号:</label>
+                <label class="layui-form-label">身份证号</label>
                 <div class="layui-input-inline">
                     <input type="text" name="identity" id="rentIdentity" lay-verify="required" placeholder="请输入身份证号"
                            class="layui-input">
                 </div>
             </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">客户名称:</label>
+                <label class="layui-form-label">客户名称</label>
                 <div class="layui-input-inline">
                     <input type="text" name="opername" id="opername" lay-verify="required" placeholder="请输入客户名称" class="layui-input">
                 </div>
             </div>
-
         </div>
         <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">车牌号:</label>
+                <label class="layui-form-label">车牌号</label>
                 <div class="layui-input-inline">
                     <input type="text" name="carnumber" lay-verify="required" readonly="readonly"  placeholder="请输入车牌号" class="layui-input">
                 </div>
             </div>
+        </div>
+        <div class="layui-form-item">
             <div class="layui-inline">
-                <label class="layui-form-label">出租价格:</label>
+                <label class="layui-form-label">出租价格</label>
                 <div class="layui-input-inline">
                     <input type="text" name="price" lay-verify="required" readonly="readonly" placeholder="请输入出租价格" class="layui-input">
                 </div>
             </div>
         </div>
-        <div class="layui-form-item">
-            <div class="layui-input-block" style="text-align: center;padding-right: 120px">
+        <div class="layui-form-item is-full">
+            <div class="layui-input-block rent-submit-row">
                 <button type="button"
                         class="layui-btn layui-btn-normal layui-btn-md layui-icon layui-icon-release layui-btn-radius"
                         lay-filter="doSubmit" lay-submit="">提交
@@ -123,6 +282,7 @@
                         class="layui-btn layui-btn-warm layui-btn-md layui-icon layui-icon-refresh layui-btn-radius">重置
                 </button>
             </div>
+        </div>
         </div>
     </form>
 </div>
@@ -143,6 +303,9 @@
         var dtree = layui.dtree;
         var laydate = layui.laydate;
         var currentSelectedCar = null;
+        var carTableInitialized = false;
+        var activeSearchIdentity = "";
+        var tableLoadingIndex = null;
 
         laydate.render({
             elem:'#begindate',
@@ -158,6 +321,26 @@
         function buildCarImageUrl(path) {
             var finalPath = path || defaultCarImage;
             return "${yeqifu}/file/downloadShowFile.action?path=" + encodeURIComponent(finalPath);
+        }
+
+        function setTableLoading(text) {
+            $("#tableLoadingHint span").text(text || "加载中...");
+        }
+
+        function openTableLoading(text) {
+            closeTableLoading();
+            setTableLoading(text || "加载中...");
+            tableLoadingIndex = layer.load(1, {shade: [0.12, '#fff']});
+        }
+
+        function closeTableLoading(text) {
+            if (tableLoadingIndex !== null) {
+                layer.close(tableLoadingIndex);
+                tableLoadingIndex = null;
+            }
+            if (text) {
+                setTableLoading(text);
+            }
         }
 
         function setRentFormCarData(car) {
@@ -216,14 +399,34 @@
             return /^(?:\d{15}|\d{17}[\dX])$/.test(value);
         }
 
-        function initCarData() {
+        function initCarData(identity) {
+            activeSearchIdentity = identity || activeSearchIdentity;
+            if (carTableInitialized && tableIns) {
+                openTableLoading("正在刷新车辆列表...");
+                tableIns.reload({
+                    url: '${yeqifu}/car/loadAllCar.action',
+                    where: {
+                        isrenting: 0
+                    },
+                    page: {
+                        curr: 1,
+                        limit: 20
+                    }
+                });
+                return;
+            }
+            carTableInitialized = true;
+            openTableLoading("正在加载车辆列表...");
             //渲染数据表格
             tableIns = table.render({
                 elem: '#carTable'   //渲染的目标对象
-                , url: '${yeqifu}/car/loadAllCar.action?isrenting=0' //数据接口
+                , url: '${yeqifu}/car/loadAllCar.action' //数据接口
+                , where: {isrenting: 0}
                 , title: '车辆列表'//数据导出来的标题
                 , height: 'full-150'
                 , page: true  //是否启用分页
+                , limit: 20
+                , limits: [20, 25, 30]
                 , cols: [[   //列表数据
                     {field: 'carnumber', title: '车牌号', align: 'center', width: '104'}
                     , {field: 'cartype', title: '出租类型', align: 'center', width: '90'}
@@ -245,6 +448,10 @@
                     , {field: 'createtime', title: '录入时间', align: 'center', width: '170'}
                     , {fixed: 'right', title: '操作', toolbar: '#carBar', align: 'center', width: '220'}
                 ]]
+                , text: {none: '暂无可租赁车辆数据'}
+                , done: function (res, curr, count) {
+                    closeTableLoading('已加载 ' + count + ' 条可租赁车辆数据');
+                }
             });
 
         }
@@ -256,24 +463,37 @@
             if (!identity) {
                 layer.msg("请输入身份证号");
                 $("#content").hide();
+                setTableLoading("等待查询");
                 return;
             }
             if (!isValidIdentity(identity)) {
                 layer.msg("请输入正确的身份证号");
                 $("#content").hide();
+                setTableLoading("请输入有效身份证号");
                 return;
             }
             var params = $("#searchFrm").serialize();
+            openTableLoading("正在校验客户信息...");
             $.post("${yeqifu}/rent/checkCustomerExist.action", params, function (obj) {
                 if (obj.code >= 0) { //此客户存在，code的返回值为0
                     $("#content").show();
-                    initCarData(); //初始化未出租汽车的所有数据
+                    initCarData(identity); //初始化未出租汽车的所有数据
                 } else {
+                    closeTableLoading("未找到可用客户信息");
                     layer.msg("客户身份证号不存在，请更正后在查询");
                     //隐藏数据表格
                     $("#content").hide();
                 }
-            })
+            }).fail(function () {
+                closeTableLoading("客户校验失败");
+                layer.msg("客户信息校验失败，请稍后重试");
+                $("#content").hide();
+            });
+        });
+
+        $("#resetSearchBtn").click(function () {
+            $("#content").hide();
+            setTableLoading("等待查询");
         });
 
         //监听行工具事件
@@ -318,12 +538,17 @@
         form.on("submit(doSubmit)", function (obj) {
             //序列化表单数据
             var params = $("#dataFrm").serialize();
+            openTableLoading("正在提交出租单...");
             $.post("${yeqifu}/rent/saveRent.action", params, function (obj) {
+                closeTableLoading("出租单提交完成");
                 layer.msg(obj.msg);
                 //关闭弹出层
                 layer.close(mainIndex);
                 $("#content").hide();
-            })
+            }).fail(function () {
+                closeTableLoading("出租单提交失败");
+                layer.msg("出租单保存失败，请稍后重试");
+            });
         });
 
         //查看大图
