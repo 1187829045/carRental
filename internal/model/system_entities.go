@@ -3,18 +3,19 @@ package model
 import "time"
 
 type Role struct {
-	RoleID    int    `json:"roleid"`
-	RoleName  string `json:"rolename"`
-	RoleDesc  string `json:"roledesc"`
-	Available int    `json:"available"`
+	RoleID        int    `json:"roleid"`
+	RoleName      string `json:"rolename"`
+	RoleDesc      string `json:"roledesc"`
+	Available     int    `json:"available"`
+	AssignedUsers string `json:"assignedusers,omitempty"`
 }
 
 type MenuManagerNode struct {
-	ID       int      `json:"id"`
-	ParentID int      `json:"parentId"`
-	Title    string   `json:"title"`
-	Spread   bool     `json:"spread"`
-	CheckArr string   `json:"checkArr,omitempty"`
+	ID       int    `json:"id"`
+	ParentID int    `json:"parentId"`
+	Title    string `json:"title"`
+	Spread   bool   `json:"spread"`
+	CheckArr string `json:"checkArr,omitempty"`
 }
 
 type LoginLog struct {

@@ -226,7 +226,13 @@ func (s *SystemService) QueryRoles(ctx context.Context, q map[string]string) (in
 	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM sys_role WHERE "+wsql, args...).Scan(&count); err != nil {
 		return 0, nil, err
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT roleid,rolename,roledesc,available FROM sys_role WHERE `+wsql+` ORDER BY roleid ASC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
+	rows, err := s.DB.QueryContext(ctx, `SELECT sr.roleid,sr.rolename,sr.roledesc,sr.available,COALESCE(GROUP_CONCAT(su.realname ORDER BY su.userid SEPARATOR '、'),'') AS assignedusers
+		 FROM sys_role sr
+		 LEFT JOIN sys_role_user sru ON sr.roleid=sru.rid
+		 LEFT JOIN sys_user su ON sru.uid=su.userid
+		 WHERE `+strings.ReplaceAll(wsql, "available", "sr.available")+`
+		 GROUP BY sr.roleid,sr.rolename,sr.roledesc,sr.available
+		 ORDER BY sr.roleid ASC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -234,7 +240,7 @@ func (s *SystemService) QueryRoles(ctx context.Context, q map[string]string) (in
 	var out []model.Role
 	for rows.Next() {
 		var r model.Role
-		if err := rows.Scan(&r.RoleID, &r.RoleName, &r.RoleDesc, &r.Available); err != nil {
+		if err := rows.Scan(&r.RoleID, &r.RoleName, &r.RoleDesc, &r.Available, &r.AssignedUsers); err != nil {
 			return 0, nil, err
 		}
 		out = append(out, r)
@@ -324,6 +330,113 @@ func (s *SystemService) SaveRoleMenu(ctx context.Context, roleid int, mids []int
 	}
 	for _, mid := range mids {
 		if _, err = tx.ExecContext(ctx, `INSERT INTO sys_role_menu(rid,mid) VALUES(?,?)`, roleid, mid); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+func (s *SystemService) QueryRoleUsers(ctx context.Context, roleid int, q map[string]string) (int64, []map[string]any, error) {
+	_, limit, offset, err := parsePage(q["page"], q["limit"])
+	if err != nil {
+		return 0, nil, err
+	}
+	selected := map[int]bool{}
+	rs, err := s.DB.QueryContext(ctx, `SELECT uid FROM sys_role_user WHERE rid=?`, roleid)
+	if err != nil {
+		return 0, nil, err
+	}
+	for rs.Next() {
+		var uid int
+		if err := rs.Scan(&uid); err != nil {
+			_ = rs.Close()
+			return 0, nil, err
+		}
+		selected[uid] = true
+	}
+	_ = rs.Close()
+
+	where := []string{"type<>1"}
+	args := make([]any, 0, 8)
+	addLike := func(k, col string) {
+		if v := strings.TrimSpace(q[k]); v != "" {
+			where = append(where, col+" LIKE ?")
+			args = append(args, likeArg(v))
+		}
+	}
+	addLike("realname", "realname")
+	addLike("loginname", "loginname")
+	addLike("phone", "phone")
+	addLike("identity", "identity")
+	if v := strings.TrimSpace(q["available"]); v != "" {
+		where = append(where, "available=?")
+		args = append(args, v)
+	}
+	wsql := strings.Join(where, " AND ")
+
+	var count int64
+	if err := s.DB.QueryRowContext(ctx, "SELECT COUNT(1) FROM sys_user WHERE "+wsql, args...).Scan(&count); err != nil {
+		return 0, nil, err
+	}
+	rows, err := s.DB.QueryContext(ctx, `SELECT userid,loginname,identity,realname,sex,address,phone,position,type,available FROM sys_user WHERE `+wsql+` ORDER BY userid DESC LIMIT ? OFFSET ?`, append(args, limit, offset)...)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer rows.Close()
+	out := make([]map[string]any, 0, limit)
+	for rows.Next() {
+		var u model.SysUser
+		if err := rows.Scan(&u.UserID, &u.LoginName, &u.Identity, &u.RealName, &u.Sex, &u.Address, &u.Phone, &u.Position, &u.Type, &u.Available); err != nil {
+			return 0, nil, err
+		}
+		out = append(out, map[string]any{
+			"userid":      u.UserID,
+			"loginname":   u.LoginName,
+			"identity":    u.Identity,
+			"realname":    u.RealName,
+			"sex":         u.Sex,
+			"address":     u.Address,
+			"phone":       u.Phone,
+			"position":    u.Position,
+			"type":        u.Type,
+			"available":   u.Available,
+			"LAY_CHECKED": selected[u.UserID],
+		})
+	}
+	return count, out, rows.Err()
+}
+
+func (s *SystemService) SaveRoleUsers(ctx context.Context, roleid int, userIDs []int) error {
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var roleCount int
+	if err = tx.QueryRowContext(ctx, `SELECT COUNT(1) FROM sys_role WHERE roleid=?`, roleid).Scan(&roleCount); err != nil {
+		return err
+	}
+	if roleCount == 0 {
+		return fmt.Errorf("role not found")
+	}
+	if _, err = tx.ExecContext(ctx, `DELETE FROM sys_role_user WHERE rid=?`, roleid); err != nil {
+		return err
+	}
+	seen := map[int]bool{}
+	for _, uid := range userIDs {
+		if uid <= 0 || seen[uid] {
+			continue
+		}
+		seen[uid] = true
+		var userCount int
+		if err = tx.QueryRowContext(ctx, `SELECT COUNT(1) FROM sys_user WHERE userid=? AND type<>1`, uid).Scan(&userCount); err != nil {
+			return err
+		}
+		if userCount == 0 {
+			return fmt.Errorf("user %d not found", uid)
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO sys_role_user(uid,rid) VALUES(?,?)`, uid, roleid); err != nil {
 			return err
 		}
 	}

@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -22,6 +23,18 @@
     <link rel="stylesheet" href="${yeqifu}/static/css/public.css" media="all"/>
     <link rel="stylesheet" href="${yeqifu}/static/layui_ext/dtree/dtree.css">
     <link rel="stylesheet" href="${yeqifu}/static/layui_ext/dtree/font/dtreefont.css">
+    <style>
+        html, body {
+            height: 100%;
+            box-sizing: border-box;
+        }
+        body.childrenBody {
+            overflow: hidden;
+        }
+        .layui-table-view {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body class="childrenBody">
 

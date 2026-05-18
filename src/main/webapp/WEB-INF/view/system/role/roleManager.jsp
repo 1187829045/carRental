@@ -6,6 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -22,6 +23,18 @@
     <link rel="stylesheet" href="${yeqifu}/static/css/public.css" media="all"/>
     <link rel="stylesheet" href="${yeqifu}/static/layui_ext/dtree/dtree.css">
     <link rel="stylesheet" href="${yeqifu}/static/layui_ext/dtree/font/dtreefont.css">
+    <style>
+        html, body {
+            height: 100%;
+            box-sizing: border-box;
+        }
+        body.childrenBody {
+            overflow: hidden;
+        }
+        .layui-table-view {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body class="childrenBody">
 
@@ -67,7 +80,7 @@
 </div>
 <div id="roleBar" style="display: none;">
     <a class="layui-btn layui-btn-xs layui-btn-radius" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-warm layui-btn-xs layui-btn-radius" lay-event="selectRoleMenu">分配菜单</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs layui-btn-radius" lay-event="selectRoleUser">分配用户</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs layui-btn-radius" lay-event="del">删除</a>
 </div>
 
@@ -111,23 +124,43 @@
     </form>
 </div>
 
-<%--角色分配菜单的弹出层开始--%>
-<div style="display: none" id="selectRoleMenu">
-    <ul id="menuTree" class="dtree" data-id="0"></ul>
+<%--角色分配用户的弹出层开始--%>
+<div style="display: none;padding: 15px" id="selectRoleUser">
+    <form class="layui-form" id="roleUserSearchFrm">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">用户姓名:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="realname" autocomplete="off" class="layui-input" placeholder="请输入用户姓名">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">登录名:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="loginname" autocomplete="off" class="layui-input" placeholder="请输入登录名">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="doUserSearch">查询</button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-warm" id="resetUserSearch">重置</button>
+            </div>
+        </div>
+    </form>
+    <table class="layui-hide" id="roleUserTable" lay-filter="roleUserTable"></table>
 </div>
 
 
 <script src="${yeqifu}/static/layui/layui.js"></script>
 <script type="text/javascript">
     var tableIns;
-    layui.extend({
-        dtree: '${yeqifu}/static/layui_ext/dist/dtree'
-    }).use(['jquery', 'layer', 'form', 'table', 'dtree'], function () {
+    layui.use(['jquery', 'layer', 'form', 'table'], function () {
         var $ = layui.jquery;
         var layer = layui.layer;
         var form = layui.form;
         var table = layui.table;
-        var dtree = layui.dtree;
+        var roleUserTableIns;
+        var selectedRoleUserIds = {};
+        var currentRoleId;
         //渲染数据表格
         tableIns = table.render({
             elem: '#roleTable'   //渲染的目标对象
@@ -142,6 +175,9 @@
                 , {field: 'roleid', title: 'ID', align: 'center'}
                 , {field: 'rolename', title: '角色名称', align: 'center'}
                 , {field: 'roledesc', title: '角色备注', align: 'center'}
+                , {field: 'assignedusers', title: '已分配用户', align: 'center', minWidth: 180, templet: function (d) {
+                    return d.assignedusers ? d.assignedusers : '<span class="layui-badge layui-bg-gray">暂无用户</span>';
+                }}
                 , {
                     field: 'available', title: '是否可用', align: 'center', templet: function (d) {
                         return d.available == '1' ? '<font color=blue>可用</font>' : '<font color=red>不可用</font>';
@@ -199,8 +235,8 @@
             } else if (layEvent === 'edit') { //编辑
                 //编辑，打开修改界面
                 openUpdateRole(data);
-            }else if(layEvent === 'selectRoleMenu'){//分配权限
-                openselectRoleMenu(data);
+            }else if(layEvent === 'selectRoleUser'){//分配用户
+                openselectRoleUser(data);
             }
         });
 
@@ -273,47 +309,105 @@
             });
         }
 
-        //打开分配菜单的弹出层
-        function openselectRoleMenu(data) {
-            var menuTree;
+        //打开分配用户的弹出层
+        function openselectRoleUser(data) {
+            selectedRoleUserIds = {};
+            currentRoleId = data.roleid;
             mainIndex=layer.open({
                 type:1,
-                title:'分配【'+data.rolename+'】的角色',
-                content:$("#selectRoleMenu"),
-                area:['400px','500px'],
+                title:'给【'+data.rolename+'】分配用户',
+                content:$("#selectRoleUser"),
+                area:['860px','560px'],
                 btnAlign:'c',
-                btn:['<div class="layui-icon layui-icon-release">确认分配</div>','<div class="layui-icon layui-icon-close">取消分配</div>'],
+                btn:['<div class="layui-icon layui-icon-release">保存分配</div>','<div class="layui-icon layui-icon-close">取消</div>'],
                 yes:function (index, layero) {
-                    var nodes = dtree.getCheckbarNodesParam("menuTree");
-                    var roleid = data.roleid;
-                    var params="roleid="+roleid;
-
-                    $.each(nodes,function (i, item) {
-                        params+="&ids="+item.nodeId;
-                    })
-                    //保存角色和菜单的关系
-                    $.post("${yeqifu}/role/saveRoleMenu.action",params,function (obj) {
+                    var params="roleid="+data.roleid;
+                    $.each(selectedRoleUserIds,function (userid, checked) {
+                        if (checked) {
+                            params+="&ids="+userid;
+                        }
+                    });
+                    //保存角色和用户的关系，空选择时表示清空该角色下的用户
+                    $.post("${yeqifu}/role/saveRoleUser.action",params,function (obj) {
                         layer.msg(obj.msg);
-                        //关闭弹出层
-                        layer.close(mainIndex);
+                        if(obj.code === 0){
+                            layer.close(mainIndex);
+                            tableIns.reload();
+                        }
                     })
                 },
                 success:function (index) {
-                    //初始化树
-                    menuTree = dtree.render({
-                        elem: "#menuTree",
-                        dataStyle: "layuiStyle", //使用layui风格的数据格式
-                        response:{message:"msg",statusCode:0}, //修改response中返回数据的定义
-                        dataFormat: "list", //配置data的风格为list
-                        checkbar:true,
-                        checkbarType:"all",
-                        checkbarData:"choose",
-                        url: "${yeqifu}/role/initRoleMenuTreeJson.action?roleid="+data.roleid
+                    $("#roleUserSearchFrm")[0].reset();
+                    roleUserTableIns = table.render({
+                        elem: '#roleUserTable',
+                        url: '${yeqifu}/role/initRoleUser.action?roleid='+data.roleid+'&page=1&limit=1000',
+                        title: '用户列表',
+                        height: 360,
+                        page: false,
+                        cols: [[
+                            {type: 'checkbox', fixed: 'left'},
+                            {field: 'userid', title: 'ID', align: 'center', width: 70},
+                            {field: 'realname', title: '用户姓名', align: 'center', width: 120},
+                            {field: 'loginname', title: '登录名', align: 'center', width: 120},
+                            {field: 'phone', title: '手机号', align: 'center', width: 140},
+                            {field: 'identity', title: '身份证号', align: 'center', minWidth: 180},
+                            {field: 'available', title: '状态', align: 'center', width: 90, templet: function (d) {
+                                return d.available == '1' ? '<font color=blue>可用</font>' : '<font color=red>不可用</font>';
+                            }}
+                        ]],
+                        done:function(res){
+                            $.each(res.data || [], function(i, item){
+                                if(selectedRoleUserIds[item.userid] === undefined && item.LAY_CHECKED){
+                                    selectedRoleUserIds[item.userid] = true;
+                                }
+                            });
+                        }
                     });
-
                 }
             })
         }
+
+        table.on('checkbox(roleUserTable)', function(obj){
+            if(obj.type === 'all'){
+                $.each(table.cache.roleUserTable || [], function(i, item){
+                    if(item && item.userid){
+                        selectedRoleUserIds[item.userid] = obj.checked;
+                    }
+                });
+                if(obj.checked){
+                    var checkStatus = table.checkStatus('roleUserTable');
+                    $.each(checkStatus.data || [], function(i, item){
+                        selectedRoleUserIds[item.userid] = true;
+                    });
+                }
+            }else if(obj.data && obj.data.userid){
+                selectedRoleUserIds[obj.data.userid] = obj.checked;
+            }
+        });
+
+        $("#doUserSearch").click(function () {
+            if(!roleUserTableIns){
+                return;
+            }
+            roleUserTableIns.reload({
+                url:"${yeqifu}/role/initRoleUser.action?roleid="+currentRoleId+"&page=1&limit=1000",
+                where: {
+                    realname: $("#roleUserSearchFrm input[name='realname']").val(),
+                    loginname: $("#roleUserSearchFrm input[name='loginname']").val()
+                }
+            });
+        });
+
+        $("#resetUserSearch").click(function () {
+            if(roleUserTableIns){
+                setTimeout(function(){
+                    roleUserTableIns.reload({
+                        url:"${yeqifu}/role/initRoleUser.action?roleid="+currentRoleId+"&page=1&limit=1000",
+                        where: {realname: '', loginname: ''}
+                    });
+                }, 0);
+            }
+        });
     });
 
 </script>

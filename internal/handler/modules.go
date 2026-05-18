@@ -293,6 +293,30 @@ func registerSystemRoutes(rg *gin.RouterGroup, d Deps) {
 		}
 		c.JSON(http.StatusOK, DispatchSuccess)
 	})
+	rg.GET("/role/initRoleUser.action", func(c *gin.Context) {
+		if u, ok := getSessionUser(c); !ok || u.Type != 1 {
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限分配用户"})
+			return
+		}
+		q := flatQuery(c)
+		count, data, err := d.SystemService.QueryRoleUsers(c.Request.Context(), intParam(c, "roleid"), q)
+		if err != nil {
+			fail(c, "查询角色用户失败")
+			return
+		}
+		c.JSON(http.StatusOK, NewPage(count, data))
+	})
+	rg.POST("/role/saveRoleUser.action", func(c *gin.Context) {
+		if u, ok := getSessionUser(c); !ok || u.Type != 1 {
+			c.JSON(http.StatusOK, gin.H{"code": -1, "msg": "无权限分配用户"})
+			return
+		}
+		if err := d.SystemService.SaveRoleUsers(c.Request.Context(), intParam(c, "roleid"), intArrayParam(c, "ids")); err != nil {
+			c.JSON(http.StatusOK, DispatchError)
+			return
+		}
+		c.JSON(http.StatusOK, DispatchSuccess)
+	})
 
 	rg.GET("/logInfo/loadAllLogInfo.action", func(c *gin.Context) {
 		count, data, err := d.SystemService.QueryLogInfos(c.Request.Context(), flatQuery(c))
