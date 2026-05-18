@@ -83,7 +83,7 @@
     </style>
 </head>
 <body class="loginBody">
-<form class="layui-form" id="loginFrm" method="post" action="${yeqifu}/login/login.action" data-error-type="${errorType}" data-error-message="${error}">
+<form style="width: 400px; height: 600px;"  class="layui-form" id="loginFrm" method="post" action="${yeqifu}/login/login.action" data-error-type="${errorType}" data-error-message="${error}">
     <div class="login-brand-title">汽车租赁系统</div>
     <div class="login_face"><img src="${yeqifu}/static/images/face.jpg" class="userAvatar"></div>
     <div id="loginAriaLive" class="sr-live-region" aria-live="assertive" aria-atomic="true"></div>
@@ -100,9 +100,9 @@
         <input type="password" placeholder="请输入密码" autocomplete="off" name="pwd" id="pwd" class="layui-input" lay-verify="required">
     </div>
     <div class="layui-form-item input-item" id="imgCode">
-        <label for="code">验证码</label>
+        <label for="code">验证码1</label>
         <input type="text" placeholder="请输入验证码" autocomplete="off" name="code" id="code" class="layui-input">
-        <img id="captchaImg" src="${yeqifu}/login/getCode.action" onclick="this.src='${yeqifu}/login/getCode.action?ts='+Date.now()" alt="captcha">
+        <img style="width: 200px; height: 30px;" id="captchaImg" src="${yeqifu}/login/getCode.action" onclick="this.src='${yeqifu}/login/getCode.action?ts='+Date.now()" alt="captcha">
     </div>
     <div class="layui-form-item">
         <button class="layui-btn layui-block" id="loginBtn" lay-filter="login" lay-submit>登录</button>
