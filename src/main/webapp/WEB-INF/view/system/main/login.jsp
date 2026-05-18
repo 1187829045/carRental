@@ -100,7 +100,7 @@
         <input type="password" placeholder="请输入密码" autocomplete="off" name="pwd" id="pwd" class="layui-input" lay-verify="required">
     </div>
     <div class="layui-form-item input-item" id="imgCode">
-        <label for="code">验证码1</label>
+        <label for="code">验证码</label>
         <input type="text" placeholder="请输入验证码" autocomplete="off" name="code" id="code" class="layui-input">
         <img style="width: 200px; height: 30px;" id="captchaImg" src="${yeqifu}/login/getCode.action" onclick="this.src='${yeqifu}/login/getCode.action?ts='+Date.now()" alt="captcha">
     </div>
